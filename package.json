@@ -1,0 +1,48 @@
+{
+	"name": "multi-step-enrollment-form",
+	"version": "0.1.0",
+	"private": true,
+	"workspaces": [
+		"packages/types"
+	],
+	"scripts": {
+		"dev": "next dev",
+		"build:types": "pnpm --filter @shared/types build",
+		"build": "pnpm run build:types && next build",
+		"start": "next start",
+		"test": "vitest",
+		"test:watch": "vitest --watch",
+		"metrics:report": "node scripts/vault-metrics-report.mjs",
+		"format": "pnpm biome format --write",
+		"lint": "pnpm biome lint --write",
+		"check": "pnpm biome check --write"
+	},
+	"dependencies": {
+		"@tanstack/react-query": "^5.100.10",
+		"next": "16.2.6",
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@shared/types": "workspace:*",
+		"@biomejs/biome": "2.4.15",
+		"@playwright/test": "^1.60.0",
+		"@testing-library/dom": "^10.4.1",
+		"@testing-library/react": "^16.3.2",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"eslint": "^9",
+		"eslint-config-next": "16.2.6",
+		"msw": "^2.14.6",
+		"typescript": "^5",
+		"vite-tsconfig-paths": "^6.1.1",
+		"vitest": "^4.1.6"
+	},
+	"msw": {
+		"workerDirectory": [
+			"public"
+		]
+	}
+}
