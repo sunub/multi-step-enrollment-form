@@ -13,7 +13,7 @@
 		"build:packages": "pnpm run -r build",
 		"build": "pnpm run build:packages && next build --webpack",
 		"start": "next start",
-		"test": "vitest",
+		"test": "pnpm run build:types && vitest",
 		"test:watch": "vitest --watch",
 		"test:e2e": "playwright test",
 		"metrics:report": "node scripts/vault-metrics-report.mjs",
