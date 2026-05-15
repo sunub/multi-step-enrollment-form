@@ -10,7 +10,7 @@
 		"build:types": "pnpm --filter @shared/types build",
 		"build": "pnpm run build:types && next build",
 		"start": "next start",
-		"test": "vitest",
+		"test": "pnpm run build:types && vitest",
 		"test:watch": "vitest --watch",
 		"metrics:report": "node scripts/vault-metrics-report.mjs",
 		"format": "pnpm biome format --write",
