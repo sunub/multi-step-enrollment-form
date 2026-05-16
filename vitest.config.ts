@@ -19,6 +19,10 @@ export default defineConfig({
 	},
 	test: {
 		name: "unit",
+		alias: {
+			"@shared/design-system": path.resolve(__dirname, "./packages/design-system/src/index.ts"),
+			"@shared/types": path.resolve(__dirname, "./packages/types/main.ts"),
+		},
 		include: [
 			"src/**/*.{test,spec}.{ts,tsx}",
 			"tests/unit/**/*.{test,spec}.{ts,tsx}",
