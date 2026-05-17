@@ -60,6 +60,27 @@ const baseStyleProperties = defineProperties({
 
 		position: ["static", "relative", "absolute", "fixed", "sticky"],
 		textAlign: ["left", "center", "right", "justify"],
+		overflow: ["visible", "hidden", "scroll", "auto"],
+		overflowX: ["visible", "hidden", "scroll", "auto"],
+		overflowY: ["visible", "hidden", "scroll", "auto"],
+		cursor: ["default", "pointer", "not-allowed", "text", "grab", "grabbing"],
+		pointerEvents: ["auto", "none"],
+		userSelect: ["none", "auto", "text", "all"],
+		opacity: [0, 0.1, 0.25, 0.5, 0.75, 1],
+
+		borderWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
+		borderTopWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
+		borderBottomWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
+		borderLeftWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
+		borderRightWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
+		borderStyle: ["solid", "dashed", "dotted", "none"],
+		borderColor: vars.color,
+
+		flexGrow: [0, 1],
+		flexShrink: [0, 1],
+		flexBasis: { ...vars.space, ...vars.layout },
+
+		objectFit: ["cover", "contain", "fill", "none"],
 	},
 	shorthands: {
 		p: ["padding"],
@@ -71,6 +92,8 @@ const baseStyleProperties = defineProperties({
 		bg: ["backgroundColor"],
 		placeItems: ["justifyContent", "alignItems"],
 		size: ["width", "height"],
+		borderX: ["borderLeftWidth", "borderRightWidth"],
+		borderY: ["borderTopWidth", "borderBottomWidth"],
 	},
 });
 
