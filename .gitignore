@@ -45,3 +45,8 @@ node_modules/
 /blob-report/
 /playwright/.cache/
 /playwright/.auth/
+
+docs/
+.claude/
+.playwright-cli/*
+.vscode/*
