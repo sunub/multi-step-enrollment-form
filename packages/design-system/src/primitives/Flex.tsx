@@ -26,6 +26,7 @@ export function Flex<T extends ElementType = "div">({
 			flexWrap={flexWrap ?? "nowrap"}
 			alignItems={alignItems}
 			justifyContent={justifyContent}
+			// biome-ignore lint/suspicious/noExplicitAny: BoxProps is generic and safe here
 			{...(props as any)}
 		/>
 	);
