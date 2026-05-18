@@ -1,12 +1,7 @@
-import { Slot } from "@radix-ui/react-slot";
 import type { RecipeVariants } from "@vanilla-extract/recipes";
 import clsx from "clsx";
-import type {
-	ButtonHTMLAttributes,
-	HTMLAttributes,
-	ReactElement,
-	Ref,
-} from "react";
+import type { ReactElement, Ref } from "react";
+import { Box, type BoxProps } from "../primitives/Box";
 import { buttonContentClass, buttonRecipe } from "./Button.css";
 
 type ButtonRecipeVariants = RecipeVariants<typeof buttonRecipe>;
@@ -17,22 +12,23 @@ type ButtonOwnProps = ButtonRecipeVariants & {
 };
 
 export type NativeButtonProps = Omit<
-	ButtonHTMLAttributes<HTMLButtonElement>,
-	ButtonVariantKeys | "className"
+	BoxProps<"button">,
+	ButtonVariantKeys | "className" | "asChild" | "as"
 > &
 	ButtonOwnProps & {
 		asChild?: false;
 		ref?: Ref<HTMLButtonElement>;
+		type?: "button" | "submit" | "reset";
 	};
 
 export type SlottableButtonProps = Omit<
-	HTMLAttributes<HTMLElement>,
-	"children" | "className"
+	BoxProps<"button">,
+	ButtonVariantKeys | "className" | "asChild" | "as" | "children"
 > &
 	ButtonOwnProps & {
 		asChild: true;
 		children: ReactElement;
-		ref?: Ref<HTMLElement>;
+		ref?: Ref<HTMLButtonElement>;
 	};
 
 export type ButtonProps = NativeButtonProps | SlottableButtonProps;
@@ -58,9 +54,9 @@ export function Button(props: ButtonProps) {
 		} = props;
 
 		return (
-			<Slot ref={ref} className={className} {...slotProps}>
+			<Box as="button" asChild ref={ref} className={className} {...slotProps}>
 				{children}
-			</Slot>
+			</Box>
 		);
 	}
 
@@ -76,8 +72,14 @@ export function Button(props: ButtonProps) {
 	} = props;
 
 	return (
-		<button ref={ref} type={type} className={className} {...buttonProps}>
+		<Box
+			as="button"
+			ref={ref}
+			type={type}
+			className={className}
+			{...buttonProps}
+		>
 			<span className={buttonContentClass}>{children}</span>
-		</button>
+		</Box>
 	);
 }
