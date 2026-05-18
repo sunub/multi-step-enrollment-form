@@ -1,6 +1,6 @@
 {
 	"compilerOptions": {
-		"target": "ES2017",
+		"target": "esnext",
 		"lib": ["dom", "dom.iterable", "esnext"],
 		"allowJs": true,
 		"skipLibCheck": true,
@@ -19,7 +19,11 @@
 			}
 		],
 		"paths": {
-			"@/*": ["./*"]
+			"@/*": ["./*"],
+			"@shared/design-system": ["./packages/design-system/src/index.ts"],
+			"@shared/mock": ["./packages/mock/main.ts"],
+			"@shared/mock/*": ["./packages/mock/src/*"],
+			"@shared/types": ["./packages/types/main.ts"]
 		}
 	},
 	"include": [
@@ -29,7 +33,7 @@
 		".next/types/**/*.ts",
 		".next/dev/types/**/*.ts",
 		"**/*.mts",
-		"mocks/generate.js"
+		"packages/mock/src/db/generateDemoCourseData.js"
 	],
 	"exclude": ["node_modules"]
 }
