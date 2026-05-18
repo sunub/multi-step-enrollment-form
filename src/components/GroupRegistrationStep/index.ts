@@ -1,0 +1,1 @@
+export { GroupRegistrationStep } from "./GroupRegistrationStep";

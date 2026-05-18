@@ -1,9 +1,30 @@
-import type { ComponentProps } from "react";
-import { Box } from "./Box";
+import type { ElementType } from "react";
+import type { BaseStyle } from "../styles/sprinkles.css";
+import { Box, type BoxProps } from "./Box";
 
-export interface GridProps
-	extends Omit<ComponentProps<typeof Box>, "display"> {}
+export type GridProps<T extends ElementType = "div"> = Omit<
+	BoxProps<T>,
+	"display"
+> & {
+	alignItems?: BaseStyle["alignItems"];
+	justifyContent?: BaseStyle["justifyContent"];
+	placeItems?: BaseStyle["placeItems"];
+};
 
-export function Grid(props: GridProps) {
-	return <Box display="grid" {...props} />;
+export function Grid<T extends ElementType = "div">({
+	alignItems,
+	justifyContent,
+	placeItems,
+	...props
+}: GridProps<T>) {
+	return (
+		<Box
+			display="grid"
+			alignItems={alignItems}
+			justifyContent={justifyContent}
+			placeItems={placeItems}
+			// biome-ignore lint/suspicious/noExplicitAny: BoxProps is generic and safe here
+			{...(props as any)}
+		/>
+	);
 }

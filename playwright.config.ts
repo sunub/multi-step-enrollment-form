@@ -73,13 +73,17 @@ export default defineConfig({
 	/* Run the app and stand-alone mock API server before starting the tests */
 	webServer: [
 		{
-			command: process.env.CI ? "MOCK_SERVER_PORT=3101 pnpm run start:mock" : "MOCK_SERVER_PORT=3101 pnpm run dev:mock",
+			command: process.env.CI
+				? "MOCK_SERVER_PORT=3101 pnpm run start:mock"
+				: "MOCK_SERVER_PORT=3101 pnpm run dev:mock",
 			url: "http://127.0.0.1:3101/health",
 			reuseExistingServer: !process.env.CI,
 			timeout: 120_000,
 		},
 		{
-			command: process.env.CI ? "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run start" : "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run dev:next",
+			command: process.env.CI
+				? "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run start"
+				: "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run dev:next",
 			url: "http://127.0.0.1:3005",
 			reuseExistingServer: !process.env.CI,
 			timeout: 120_000,

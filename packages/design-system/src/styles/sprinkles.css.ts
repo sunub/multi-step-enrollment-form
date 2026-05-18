@@ -2,6 +2,12 @@ import { createSprinkles, defineProperties } from "@vanilla-extract/sprinkles";
 import { vars } from "../tokens/theme.css";
 
 const baseStyleProperties = defineProperties({
+	conditions: {
+		mobile: {},
+		tablet: { "@media": "screen and (min-width: 768px)" },
+		desktop: { "@media": "screen and (min-width: 1024px)" },
+	},
+	defaultCondition: "mobile",
 	properties: {
 		display: ["none", "flex", "block", "inline", "grid"],
 		flexWrap: ["nowrap", "wrap", "wrap-reverse"],
@@ -11,6 +17,7 @@ const baseStyleProperties = defineProperties({
 			"flex-start",
 			"center",
 			"flex-end",
+			"baseline",
 			"space-between",
 			"space-around",
 			"space-evenly",
@@ -20,6 +27,7 @@ const baseStyleProperties = defineProperties({
 			"flex-start",
 			"center",
 			"flex-end",
+			"baseline",
 			"space-between",
 			"space-around",
 			"space-evenly",
@@ -66,7 +74,7 @@ const baseStyleProperties = defineProperties({
 		cursor: ["default", "pointer", "not-allowed", "text", "grab", "grabbing"],
 		pointerEvents: ["auto", "none"],
 		userSelect: ["none", "auto", "text", "all"],
-		opacity: [0, 0.1, 0.25, 0.5, 0.75, 1],
+		opacity: [0, 0.1, 0.25, 0.5, 0.6, 0.75, 1],
 
 		borderWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },
 		borderTopWidth: { 0: "0px", 1: "1px", 2: "2px", 4: "4px" },

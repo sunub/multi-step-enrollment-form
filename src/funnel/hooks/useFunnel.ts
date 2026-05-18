@@ -13,70 +13,70 @@ import type { FunnelResult, StepConfig } from "../types";
  * @param formData - 현재 폼 데이터 (shouldRender 계산에 사용)
  */
 export function useFunnel<T>(
-  steps: StepConfig<T>[],
-  formData: T,
+	steps: StepConfig<T>[],
+	formData: T,
 ): FunnelResult<T> {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+	const router = useRouter();
+	const pathname = usePathname();
+	const searchParams = useSearchParams();
 
-  const activeSteps = useMemo(() => {
-    return steps.filter(
-      (step) => !step.shouldRender || step.shouldRender(formData),
-    );
-  }, [steps, formData]);
+	const activeSteps = useMemo(() => {
+		return steps.filter(
+			(step) => !step.shouldRender || step.shouldRender(formData),
+		);
+	}, [steps, formData]);
 
-  const stepParam = searchParams.get("step");
-  const currentStepId = stepParam || activeSteps[0]?.id || "";
+	const stepParam = searchParams.get("step");
+	const currentStepId = stepParam || activeSteps[0]?.id || "";
 
-  const currentIndex = useMemo(() => {
-    return activeSteps.findIndex((s) => s.id === currentStepId);
-  }, [activeSteps, currentStepId]);
+	const currentIndex = useMemo(() => {
+		return activeSteps.findIndex((s) => s.id === currentStepId);
+	}, [activeSteps, currentStepId]);
 
-  useEffect(() => {
-    if (currentIndex === -1 && activeSteps.length > 0) {
-      const firstStepId = activeSteps[0].id;
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("step", firstStepId);
-      router.replace(`${pathname}?${params.toString()}`);
-    }
-  }, [currentIndex, activeSteps, pathname, router, searchParams]);
+	useEffect(() => {
+		if (currentIndex === -1 && activeSteps.length > 0) {
+			const firstStepId = activeSteps[0].id;
+			const params = new URLSearchParams(searchParams.toString());
+			params.set("step", firstStepId);
+			router.replace(`${pathname}?${params.toString()}`);
+		}
+	}, [currentIndex, activeSteps, pathname, router, searchParams]);
 
-  const progress = useMemo(() => {
-    if (activeSteps.length === 0) return 0;
-    return Math.floor(((currentIndex + 1) / activeSteps.length) * 100);
-  }, [currentIndex, activeSteps.length]);
+	const progress = useMemo(() => {
+		if (activeSteps.length === 0) return 0;
+		return Math.floor(((currentIndex + 1) / activeSteps.length) * 100);
+	}, [currentIndex, activeSteps.length]);
 
-  const navigateTo = useCallback(
-    (stepId: string) => {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("step", stepId);
-      router.push(`${pathname}?${params.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
+	const navigateTo = useCallback(
+		(stepId: string) => {
+			const params = new URLSearchParams(searchParams.toString());
+			params.set("step", stepId);
+			router.push(`${pathname}?${params.toString()}`);
+		},
+		[pathname, router, searchParams],
+	);
 
-  const next = useCallback(() => {
-    if (currentIndex < activeSteps.length - 1) {
-      navigateTo(activeSteps[currentIndex + 1].id);
-    }
-  }, [currentIndex, activeSteps, navigateTo]);
+	const next = useCallback(() => {
+		if (currentIndex < activeSteps.length - 1) {
+			navigateTo(activeSteps[currentIndex + 1].id);
+		}
+	}, [currentIndex, activeSteps, navigateTo]);
 
-  const prev = useCallback(() => {
-    if (currentIndex > 0) {
-      navigateTo(activeSteps[currentIndex - 1].id);
-    }
-  }, [currentIndex, activeSteps, navigateTo]);
+	const prev = useCallback(() => {
+		if (currentIndex > 0) {
+			navigateTo(activeSteps[currentIndex - 1].id);
+		}
+	}, [currentIndex, activeSteps, navigateTo]);
 
-  return {
-    currentStepId,
-    activeSteps,
-    currentIndex,
-    progress,
-    next,
-    prev,
-    navigateTo,
-    isFirst: currentIndex === 0,
-    isLast: currentIndex === activeSteps.length - 1 && activeSteps.length > 0,
-  };
+	return {
+		currentStepId,
+		activeSteps,
+		currentIndex,
+		progress,
+		next,
+		prev,
+		navigateTo,
+		isFirst: currentIndex === 0,
+		isLast: currentIndex === activeSteps.length - 1 && activeSteps.length > 0,
+	};
 }
