@@ -89,7 +89,7 @@ jobs:
   e2e-tests:
     name: E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    needs: [lint, test, build]
+    needs: [lint, build, unit-test]
     timeout-minutes: 45
     env:
       NODE_ENV: test
