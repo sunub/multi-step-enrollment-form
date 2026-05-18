@@ -57,6 +57,30 @@ export const groupApplicationSchema = z
 				path: ["participants"],
 			});
 		}
+
+		const usedEmails = new Set<string>();
+		const representativeEmail = data.representative.email.toLowerCase();
+
+		usedEmails.add(representativeEmail);
+
+		data.participants.forEach((participant, index) => {
+			const currentEmail = participant.email.toLowerCase();
+			if (!currentEmail) return;
+
+			if (usedEmails.has(currentEmail)) {
+				const isDuplicateWithRepresentative =
+					currentEmail === representativeEmail;
+				ctx.addIssue({
+					code: "custom",
+					message: isDuplicateWithRepresentative
+						? "대표자 이메일과 중복됩니다."
+						: "다른 참가자의 이메일과 중복됩니다.",
+					path: ["participants", index, "email"],
+				});
+			} else {
+				usedEmails.add(currentEmail);
+			}
+		});
 	});
 
 export type RepresentativeData = z.infer<typeof representativeSchema>;
