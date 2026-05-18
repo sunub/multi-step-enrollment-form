@@ -63,6 +63,7 @@ jobs:
         run: pnpm run lint
 
   test:
+    name: Unit Tests (Vitest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -81,10 +82,49 @@ jobs:
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create test vault directory
-        run: mkdir -p test-vault
-
       - name: Test
         run: pnpm run test
-        env:
-          VAULT_DIR_PATH: ${{ github.workspace }}/test-vault
+
+  e2e-tests:
+    name: E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: test
+    timeout-minutes: 45
+    env:
+      NODE_ENV: test
+    container:
+      # Keep this image version aligned with package.json @playwright/test.
+      image: mcr.microsoft.com/playwright:v1.60.0-noble
+      options: --ipc=host
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm run build:packages
+
+      - name: Run E2E Tests
+        run: pnpm run test:e2e
+
+      - name: Upload Playwright Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
