@@ -1,1 +1,1 @@
-export * from "./CourseSelectionStep";
+export * from "../../components/CourseSelectionStep";

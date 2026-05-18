@@ -1,5 +1,7 @@
 import type { CourseType } from "@shared/types";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
+import type { GroupApplicationData } from "../components/GroupRegistrationStep/types";
+import type { IndividualApplicationData } from "../components/IndividualRegistration/types";
 
 export type EnrollmentType = "personal" | "group";
 export type SelectedCourseSnapshot = Pick<
@@ -22,7 +24,36 @@ export interface EnrollmentFormData {
 	};
 }
 
-const storage = createJSONStorage<EnrollmentFormData>(() => {
+export function createSelectedCourseSnapshot(
+	course: CourseType | SelectedCourseSnapshot,
+): SelectedCourseSnapshot {
+	return {
+		id: course.id,
+		title: course.title,
+		price: course.price,
+		startDate: course.startDate,
+		category: course.category,
+	};
+}
+
+export function isSameSelectedCourseSnapshot(
+	left: SelectedCourseSnapshot | null,
+	right: SelectedCourseSnapshot | null,
+) {
+	if (left === right) return true;
+	if (!left || !right) return false;
+
+	return (
+		left.id === right.id &&
+		left.title === right.title &&
+		left.price === right.price &&
+		left.startDate === right.startDate &&
+		left.category === right.category
+	);
+}
+
+// biome-ignore lint/suspicious/noExplicitAny: storage can accept various types
+const storage = createJSONStorage<any>(() => {
 	if (typeof window !== "undefined") {
 		return sessionStorage;
 	}
@@ -44,5 +75,42 @@ export const enrollmentFormAtom = atomWithStorage<EnrollmentFormData>(
 	"enrollment-form",
 	initialData,
 	storage,
-	{ getOnInit: true },
+	{ getOnInit: false },
 );
+
+export const groupRegistrationInitialData: GroupApplicationData = {
+	representative: {
+		name: "",
+		email: "",
+		phone: "",
+		motivation: "",
+	},
+	groupInfo: {
+		groupName: "",
+		managerName: "",
+		participantCount: 2,
+	},
+	participants: Array.from({ length: 2 }, () => ({ name: "", email: "" })),
+};
+
+export const groupRegistrationAtom = atomWithStorage<GroupApplicationData>(
+	"group-registration-form",
+	groupRegistrationInitialData,
+	storage,
+	{ getOnInit: false },
+);
+
+export const individualRegistrationInitialData: IndividualApplicationData = {
+	name: "",
+	email: "",
+	phone: "",
+	motivation: "",
+};
+
+export const individualRegistrationAtom =
+	atomWithStorage<IndividualApplicationData>(
+		"individual-registration-form",
+		individualRegistrationInitialData,
+		storage,
+		{ getOnInit: false },
+	);
