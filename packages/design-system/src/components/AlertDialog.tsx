@@ -4,7 +4,12 @@ import React from "react";
 import { Flex } from "../primitives/Flex";
 import * as style from "./AlertDialog.css";
 import { Backdrop } from "./Backdrop";
-import { Button, type ButtonProps } from "./Button";
+import {
+	Button,
+	type ButtonProps,
+	type NativeButtonProps,
+	type SlottableButtonProps,
+} from "./Button";
 import { Text } from "./Text";
 
 export const AlertDialog = AlertDialogPrimitive.Root;
@@ -108,12 +113,16 @@ export const AlertDialogAction = React.forwardRef<
 				variant={variant}
 				className={className}
 				asChild
-				{...(props as any)}
+				{...(props as unknown as Omit<SlottableButtonProps, "asChild">)}
 			>
 				{props.children as React.ReactElement}
 			</Button>
 		) : (
-			<Button variant={variant} className={className} {...(props as any)} />
+			<Button
+				variant={variant}
+				className={className}
+				{...(props as unknown as Omit<NativeButtonProps, "asChild">)}
+			/>
 		)}
 	</AlertDialogPrimitive.Action>
 ));
@@ -131,15 +140,20 @@ export const AlertDialogCancel = React.forwardRef<
 				variant={variant}
 				className={className}
 				asChild
-				{...(props as any)}
+				{...(props as unknown as Omit<SlottableButtonProps, "asChild">)}
 			>
 				{props.children as React.ReactElement}
 			</Button>
 		) : (
-			<Button variant={variant} className={className} {...(props as any)} />
+			<Button
+				variant={variant}
+				className={className}
+				{...(props as unknown as Omit<NativeButtonProps, "asChild">)}
+			/>
 		)}
 	</AlertDialogPrimitive.Cancel>
 ));
+
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName;
 
 export const AlertDialogFooter = ({
