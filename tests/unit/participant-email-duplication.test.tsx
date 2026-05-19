@@ -11,6 +11,10 @@ import { GroupRegistrationStep } from "../../src/components/GroupRegistrationSte
 
 const mockOnNext = vi.fn();
 const mockOnPrev = vi.fn();
+const representativeNameLabel = /대표자 성함을 입력해주세요/;
+const representativeEmailLabel = /대표자 이메일을 입력해주세요/;
+const representativePhoneLabel = /대표자 연락처를 입력해주세요/;
+const managerNameLabel = /담당자 성함을 입력해주세요/;
 
 describe("참가자 이메일 중복 체크 테스트", () => {
 	beforeEach(() => {
@@ -27,16 +31,16 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 
 		// 필수 정보 입력
 		fireEvent.change(
-			await screen.findByLabelText("대표자 성함을 입력해주세요"),
+			await screen.findByLabelText(representativeNameLabel),
 			{ target: { value: "홍길동" } },
 		);
-		fireEvent.change(screen.getByLabelText("대표자 이메일을 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 			target: { value: "leader@example.com" },
 		});
-		fireEvent.change(screen.getByLabelText("대표자 연락처를 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(representativePhoneLabel), {
 			target: { value: "010-1234-5678" },
 		});
-		fireEvent.change(screen.getByLabelText("담당자 성함을 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(managerNameLabel), {
 			target: { value: "김담당" },
 		});
 		fireEvent.change(screen.getByLabelText("단체명"), {
@@ -84,7 +88,7 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 
 		const leaderEmail = "leader@example.com";
 		fireEvent.change(
-			await screen.findByLabelText("대표자 이메일을 입력해주세요"),
+			await screen.findByLabelText(representativeEmailLabel),
 			{ target: { value: leaderEmail } },
 		);
 
@@ -109,16 +113,16 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 
 		// 모든 필수 정보 및 중복된 이메일 입력
 		fireEvent.change(
-			await screen.findByLabelText("대표자 성함을 입력해주세요"),
+			await screen.findByLabelText(representativeNameLabel),
 			{ target: { value: "홍길동" } },
 		);
-		fireEvent.change(screen.getByLabelText("대표자 이메일을 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 			target: { value: "leader@example.com" },
 		});
-		fireEvent.change(screen.getByLabelText("대표자 연락처를 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(representativePhoneLabel), {
 			target: { value: "010-1234-5678" },
 		});
-		fireEvent.change(screen.getByLabelText("담당자 성함을 입력해주세요"), {
+		fireEvent.change(screen.getByLabelText(managerNameLabel), {
 			target: { value: "김담당" },
 		});
 		fireEvent.change(screen.getByLabelText("단체명"), {

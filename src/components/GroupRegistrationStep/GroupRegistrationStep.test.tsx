@@ -8,6 +8,8 @@ import {
 import { GroupRegistrationStep } from "./GroupRegistrationStep";
 import type { GroupApplicationData } from "./types";
 
+const representativeNameLabel = /대표자 성함을 입력해주세요/;
+
 vi.mock("next/navigation", () => ({
 	usePathname: () => "/courses",
 	useRouter: () => ({
@@ -45,13 +47,13 @@ describe("GroupRegistrationStep", () => {
 		window.history.replaceState(null, "", "/courses?step=group-registration");
 	});
 
-	it("asks for confirmation before moving to the previous step when unsaved changes exist", async () => {
+	it("moves to the previous step without confirmation when unsaved changes exist", async () => {
 		const { onPrev } = renderGroupRegistrationStep();
 		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 
 		await act(async () => {
 			fireEvent.change(
-				screen.getByRole("textbox", { name: "대표자 성함을 입력해주세요" }),
+				screen.getByRole("textbox", { name: representativeNameLabel }),
 				{
 					target: { value: "홍길동" },
 				},
@@ -59,15 +61,15 @@ describe("GroupRegistrationStep", () => {
 			fireEvent.click(screen.getByRole("button", { name: "이전 단계로 이동" }));
 		});
 
-		expect(confirmSpy).toHaveBeenCalledTimes(1);
-		expect(onPrev).not.toHaveBeenCalled();
+		expect(confirmSpy).not.toHaveBeenCalled();
+		expect(onPrev).toHaveBeenCalledTimes(1);
 	});
 
-	it("persists the draft on blur and still asks for confirmation before moving back", async () => {
+	it("persists the draft on blur and still moves to the previous step without confirmation", async () => {
 		const { onPrev, store } = renderGroupRegistrationStep();
 		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 		const representativeNameInput = screen.getByRole("textbox", {
-			name: "대표자 성함을 입력해주세요",
+			name: representativeNameLabel,
 		});
 
 		await act(async () => {
@@ -83,11 +85,11 @@ describe("GroupRegistrationStep", () => {
 			fireEvent.click(screen.getByRole("button", { name: "이전 단계로 이동" }));
 		});
 
-		expect(confirmSpy).toHaveBeenCalledTimes(1);
-		expect(onPrev).not.toHaveBeenCalled();
+		expect(confirmSpy).not.toHaveBeenCalled();
+		expect(onPrev).toHaveBeenCalledTimes(1);
 	});
 
-	it("asks for confirmation when restored group draft data already exists on mount", async () => {
+	it("asks for confirmation when restored group draft data already exists and browser back is used", async () => {
 		const { onPrev } = renderGroupRegistrationStep({
 			...groupRegistrationInitialData,
 			representative: {
@@ -98,7 +100,7 @@ describe("GroupRegistrationStep", () => {
 		const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
 
 		await act(async () => {
-			fireEvent.click(screen.getByRole("button", { name: "이전 단계로 이동" }));
+			window.dispatchEvent(new PopStateEvent("popstate"));
 		});
 
 		expect(confirmSpy).toHaveBeenCalledTimes(1);
