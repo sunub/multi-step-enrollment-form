@@ -94,13 +94,13 @@ export function TextField({
 	};
 
 	const descriptionIds =
-		[
-			!isError && helperText ? helperId : null,
-		]
-			.filter(Boolean)
-			.join(" ") || undefined;
+		[!isError && helperText ? helperId : null].filter(Boolean).join(" ") ||
+		undefined;
 
-	const errorId = isError && (errorMessageId || helperId) ? (errorMessageId || helperId) : undefined;
+	const errorId =
+		isError && (errorMessageId || helperId)
+			? errorMessageId || helperId
+			: undefined;
 
 	return (
 		<Flex direction="column" gap={4} style={{ width: "100%" }}>
