@@ -1,4 +1,16 @@
 export {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogPortal,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "./AlertDialog";
+export {
 	Backdrop,
 	type BackdropProps,
 } from "./Backdrop";

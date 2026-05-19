@@ -1,26 +1,25 @@
 import clsx from "clsx";
-import type { ComponentProps, ElementType } from "react";
-import { Box } from "../primitives/Box";
+import type { ComponentPropsWithRef, ElementType } from "react";
+import { Box, type BoxProps } from "../primitives/Box";
 import * as styles from "./Text.css";
 
 type TextVariant = keyof typeof styles.textVariant;
 
-export interface TextProps extends Omit<ComponentProps<typeof Box>, "as"> {
-	as?: ElementType;
+export type TextProps<T extends ElementType = "p"> = BoxProps<T> & {
 	variant?: TextVariant;
-}
+};
 
-export function Text({
-	as = "p",
+export function Text<T extends ElementType = "p">({
+	as,
 	variant = "bodyMd",
 	className,
 	...props
-}: TextProps) {
+}: TextProps<T> & { ref?: ComponentPropsWithRef<T>["ref"] }) {
 	return (
 		<Box
-			as={as}
+			as={as || ("p" as unknown as T)}
 			className={clsx(styles.textVariant[variant], className)}
-			{...props}
+			{...(props as BoxProps<T>)}
 		/>
 	);
 }
