@@ -1,6 +1,5 @@
 import { Box, Flex, Surface, Text, vars } from "@shared/design-system";
 import type { CourseCategoryType, CourseType } from "@shared/types";
-import type React from "react";
 
 interface CourseCardProps {
 	course: CourseType;
@@ -15,12 +14,13 @@ const categoryColorMap: Record<CourseCategoryType, keyof typeof vars.color> = {
 	business: "surfaceTint",
 };
 
-export const CourseCard: React.FC<CourseCardProps> = ({
+export const CourseCard = ({
 	course,
 	isSelected,
 	onSelect,
-}) => {
+}: CourseCardProps) => {
 	const isFull = course.currentEnrollment >= course.maxCapacity;
+	const isEmergency = course.maxCapacity - course.currentEnrollment <= 5;
 	const categoryColor = categoryColorMap[course.category] || "primary";
 
 	return (
@@ -32,6 +32,7 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 			cursor={isFull ? "not-allowed" : "pointer"}
 			opacity={isFull ? 0.5 : 1}
 			data-testid={`course-card-${course.id}`}
+			aria-disabled={isFull}
 			style={{
 				display: "block",
 				transition: "all 0.2s",
@@ -41,9 +42,20 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 			<input
 				type="radio"
 				name="selectedCourseId"
-				style={{ display: "none" }}
+				style={{
+					position: "absolute",
+					width: "1px",
+					height: "1px",
+					padding: "0",
+					margin: "-1px",
+					overflow: "hidden",
+					clip: "rect(0, 0, 0, 0)",
+					whiteSpace: "nowrap",
+					borderWidth: "0",
+				}}
 				disabled={isFull}
 				checked={isSelected}
+				aria-checked={isSelected}
 				onChange={() => onSelect(course.id)}
 				data-testid={`course-radio-${course.id}`}
 			/>
@@ -62,6 +74,16 @@ export const CourseCard: React.FC<CourseCardProps> = ({
 							data-testid={`course-full-badge-${course.id}`}
 						>
 							신청 마감
+						</Text>
+					)}
+					{!isFull && isEmergency && (
+						<Text
+							variant="labelSm"
+							color="warning"
+							fontWeight="bold"
+							data-testid={`course-emergency-badge-${course.id}`}
+						>
+							마감 임박
 						</Text>
 					)}
 				</Flex>

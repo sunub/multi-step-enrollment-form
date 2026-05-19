@@ -24,6 +24,7 @@ export const PaginationControl: React.FC<PaginationControlProps> = ({
 				disabled={!hasPrevPage}
 				onClick={() => onPageChange(currentPage - 1)}
 				data-testid="pagination-prev"
+				aria-label="이전 페이지"
 			>
 				이전
 			</Button>
@@ -36,6 +37,7 @@ export const PaginationControl: React.FC<PaginationControlProps> = ({
 				disabled={!hasNextPage}
 				onClick={() => onPageChange(currentPage + 1)}
 				data-testid="pagination-next"
+				aria-label="다음 페이지"
 			>
 				다음
 			</Button>
