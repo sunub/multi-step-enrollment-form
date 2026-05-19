@@ -104,7 +104,12 @@ export const AlertDialogAction = React.forwardRef<
 >(({ className, variant = "primary", asChild, ...props }, ref) => (
 	<AlertDialogPrimitive.Action asChild ref={ref}>
 		{asChild ? (
-			<Button variant={variant} className={className} asChild {...(props as any)}>
+			<Button
+				variant={variant}
+				className={className}
+				asChild
+				{...(props as any)}
+			>
 				{props.children as React.ReactElement}
 			</Button>
 		) : (
@@ -122,7 +127,12 @@ export const AlertDialogCancel = React.forwardRef<
 >(({ className, variant = "outline", asChild, ...props }, ref) => (
 	<AlertDialogPrimitive.Cancel asChild ref={ref}>
 		{asChild ? (
-			<Button variant={variant} className={className} asChild {...(props as any)}>
+			<Button
+				variant={variant}
+				className={className}
+				asChild
+				{...(props as any)}
+			>
 				{props.children as React.ReactElement}
 			</Button>
 		) : (
