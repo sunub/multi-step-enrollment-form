@@ -1,14 +1,24 @@
-import { useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import { useCallback } from "react";
 import { useFormContext } from "react-hook-form";
 import { individualRegistrationAtom } from "../../../enrollment/atoms";
-import type { IndividualApplicationData } from "../types";
+import {
+	type IndividualApplicationData,
+	isSameIndividualApplicationData,
+	normalizeIndividualApplicationData,
+} from "../types";
 
 export function usePersistIndividualRegistrationSnapshot() {
 	const { getValues } = useFormContext<IndividualApplicationData>();
+	const liveAtomState = useAtomValue(individualRegistrationAtom);
 	const setLiveAtomState = useSetAtom(individualRegistrationAtom);
 
 	return useCallback(() => {
-		setLiveAtomState(getValues());
-	}, [getValues, setLiveAtomState]);
+		const nextSnapshot = normalizeIndividualApplicationData(getValues());
+		if (isSameIndividualApplicationData(liveAtomState, nextSnapshot)) {
+			return;
+		}
+
+		setLiveAtomState(nextSnapshot);
+	}, [getValues, liveAtomState, setLiveAtomState]);
 }

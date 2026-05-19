@@ -12,6 +12,11 @@ import type { GroupApplicationData } from "../../src/components/GroupRegistratio
 
 const mockOnNext = vi.fn();
 const mockOnPrev = vi.fn();
+const representativeNameLabel = /대표자 성함을 입력해주세요/;
+const representativeEmailLabel = /대표자 이메일을 입력해주세요/;
+const representativePhoneLabel = /대표자 연락처를 입력해주세요/;
+const managerNameLabel = /담당자 성함을 입력해주세요/;
+const participantCountLabel = /신청 인원/;
 
 const persistedGroupRegistrationData: GroupApplicationData = {
 	representative: {
@@ -38,7 +43,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 	});
 
 	describe("기본 기능 및 복구 (Hydration)", () => {
-		it("세션 스토리지에 저장된 값이 있을 경우 이를 복원하고 수정 시 다시 저장한다", async () => {
+		it("세션 스토리지 값이 있어도 초기 렌더는 현재 atom 상태를 사용하고 수정 시 다시 저장한다", async () => {
 			window.sessionStorage.setItem(
 				"group-registration-form",
 				JSON.stringify(persistedGroupRegistrationData),
@@ -52,11 +57,11 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 
 			// Hydration 대기
 			const nameInput = await screen.findByLabelText(
-				"대표자 성함을 입력해주세요",
+				representativeNameLabel,
 			);
-			expect(nameInput).toHaveValue("홍길동");
+			expect(nameInput).toHaveValue("");
 
-			const participantNameInput = screen.getByDisplayValue("저장된 참가자");
+			const participantNameInput = screen.getByLabelText("참가자 1 이름");
 
 			fireEvent.change(nameInput, { target: { value: "고친 대표자" } });
 			fireEvent.blur(nameInput);
@@ -70,12 +75,10 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				const persistedState = window.sessionStorage.getItem(
 					"group-registration-form",
 				);
-				if (!persistedState) return false;
-				const parsed = JSON.parse(persistedState);
-				return (
-					parsed.representative.name === "고친 대표자" &&
-					parsed.participants[0].name === "수정된 참가자"
-				);
+				expect(persistedState).not.toBeNull();
+				const parsed = JSON.parse(persistedState ?? "");
+				expect(parsed.representative.name).toBe("고친 대표자");
+				expect(parsed.participants[0].name).toBe("수정된 참가자");
 			});
 		});
 	});
@@ -89,7 +92,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 			);
 
 			const nameInput = await screen.findByLabelText(
-				"대표자 성함을 입력해주세요",
+				representativeNameLabel,
 			);
 
 			fireEvent.change(nameInput, { target: { value: "홍" } });
@@ -109,7 +112,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 			);
 
 			const emailInput = await screen.findByLabelText(
-				"대표자 이메일을 입력해주세요",
+				representativeEmailLabel,
 			);
 
 			fireEvent.change(emailInput, { target: { value: "invalid-email" } });
@@ -127,6 +130,43 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				).not.toBeInTheDocument();
 			});
 		});
+
+		it("참가자 수가 범위를 벗어날 경우 에러 메시지를 표시한다", async () => {
+			render(
+				<Provider>
+					<GroupRegistrationStep onNext={mockOnNext} onPrev={mockOnPrev} />
+				</Provider>,
+			);
+
+			const countInput = await screen.findByRole("spinbutton", {
+				name: participantCountLabel,
+			});
+
+			// 11명으로 설정 (범위 초과)
+			fireEvent.change(countInput, { target: { value: "11" } });
+
+			// Debounce 및 Validation 대기
+			await waitFor(
+				() => {
+					expect(
+						screen.getByText("신청 인원은 2명에서 10명 사이로 입력해주세요."),
+					).toBeInTheDocument();
+				},
+				{ timeout: 2000 },
+			);
+
+			// 1명으로 설정 (범위 미만)
+			fireEvent.change(countInput, { target: { value: "1" } });
+
+			await waitFor(
+				() => {
+					expect(
+						screen.getByText("신청 인원은 2명에서 10명 사이로 입력해주세요."),
+					).toBeInTheDocument();
+				},
+				{ timeout: 2000 },
+			);
+		});
 	});
 
 	describe("동적 필드 관리 (Dynamic Fields)", () => {
@@ -137,7 +177,9 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				</Provider>,
 			);
 
-			const countInput = await screen.findByLabelText("참가할 총 인원수");
+			const countInput = await screen.findByRole("spinbutton", {
+				name: participantCountLabel,
+			});
 
 			// 5명으로 늘림
 			fireEvent.change(countInput, { target: { value: "5" } });
@@ -170,7 +212,9 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				</Provider>,
 			);
 
-			const countInput = await screen.findByLabelText("참가할 총 인원수");
+			const countInput = await screen.findByRole("spinbutton", {
+				name: participantCountLabel,
+			});
 
 			// 10명으로 설정
 			fireEvent.change(countInput, { target: { value: "10" } });
@@ -225,16 +269,16 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 
 			// 대표자 정보 입력
 			fireEvent.change(
-				await screen.findByLabelText("대표자 성함을 입력해주세요"),
+				await screen.findByLabelText(representativeNameLabel),
 				{ target: { value: "홍길동" } },
 			);
-			fireEvent.change(screen.getByLabelText("대표자 이메일을 입력해주세요"), {
+			fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 				target: { value: "leader@example.com" },
 			});
-			fireEvent.change(screen.getByLabelText("대표자 연락처를 입력해주세요"), {
+			fireEvent.change(screen.getByLabelText(representativePhoneLabel), {
 				target: { value: "010-1234-5678" },
 			});
-			fireEvent.change(screen.getByLabelText("담당자 성함을 입력해주세요"), {
+			fireEvent.change(screen.getByLabelText(managerNameLabel), {
 				target: { value: "김담당" },
 			});
 

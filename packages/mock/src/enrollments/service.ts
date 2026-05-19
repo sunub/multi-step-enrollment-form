@@ -3,7 +3,6 @@ import {
 	PersonalEnrollmentRequestSchema,
 } from "@shared/types";
 import { Courses } from "../db/models/Courses";
-import { DemoUsers } from "../db/models/DemoUsers";
 import {
 	CourseFullError,
 	DuplicateEnrollmentError,
@@ -11,6 +10,8 @@ import {
 	type MockErrorBody,
 	NotFoundError,
 } from "../errors";
+import type { MockEnrollmentConfig } from "./config";
+import { applyMockEnrollmentScenario } from "./scenarios";
 
 export interface MockEnrollmentSuccessBody {
 	enrollmentId: string;
@@ -28,8 +29,7 @@ export interface SubmitEnrollmentOptions {
 	delayMs?: number;
 	now?: () => Date;
 	random?: () => number;
-	randomErrorPercentage?: number;
-	demoUserId?: string;
+	config?: MockEnrollmentConfig;
 }
 
 function createFieldErrors(issues: { message: string; path: PropertyKey[] }[]) {
@@ -42,23 +42,17 @@ function createFieldErrors(issues: { message: string; path: PropertyKey[] }[]) {
 	return fieldErrors;
 }
 
-function resolveDemoUser(demoUserId?: string) {
-	if (!demoUserId) {
+function resolveConfiguredScenario(options: SubmitEnrollmentOptions) {
+	const config = options.config;
+	if (!config) {
 		return null;
 	}
 
-	return DemoUsers.users.find((user) => user.id === demoUserId) ?? null;
-}
-
-function applyDemoUserScenario(demoUserId?: string) {
-	switch (demoUserId) {
-		case "user-0002":
-			throw new CourseFullError("정원이 초과되었습니다.");
-		case "user-0003":
-			throw new DuplicateEnrollmentError("이미 신청된 강의입니다.");
-		default:
-			return;
+	if (config.forcedScenario) {
+		return config.forcedScenario;
 	}
+
+	return null;
 }
 
 export async function submitEnrollment(
@@ -68,8 +62,6 @@ export async function submitEnrollment(
 	const now = options.now ?? (() => new Date());
 	const random = options.random ?? Math.random;
 	const delayMs = options.delayMs ?? 0;
-	const randomErrorPercentage = options.randomErrorPercentage ?? 10;
-	const demoUserId = options.demoUserId;
 
 	const isGroup =
 		typeof body === "object" &&
@@ -90,27 +82,9 @@ export async function submitEnrollment(
 	}
 
 	const data = parsed.data;
-	const demoUser = resolveDemoUser(demoUserId);
-
-	if (demoUser && data.applicant.email !== demoUser.email) {
-		throw new InvalidInputError("입력값이 올바르지 않습니다.", {
-			"applicant.email":
-				"DEMO_USER_ID에 지정된 데모 유저 이메일과 신청자 이메일이 일치해야 합니다.",
-		});
-	}
-
-	if (demoUser) {
-		applyDemoUserScenario(demoUser.id);
-	} else if (random() * 100 < randomErrorPercentage) {
-		const errorType = random() > 0.5 ? "COURSE_FULL" : "INVALID_INPUT";
-
-		if (errorType === "COURSE_FULL") {
-			throw new CourseFullError("랜덤 에러: 정원이 초과되었습니다.");
-		}
-
-		throw new InvalidInputError("랜덤 에러: 입력값이 올바르지 않습니다.", {
-			form: "서버 측에서 무작위로 발생한 검증 오류입니다.",
-		});
+	const configuredScenario = resolveConfiguredScenario(options);
+	if (configuredScenario) {
+		applyMockEnrollmentScenario(configuredScenario);
 	}
 
 	if (data.applicant.email === "duplicate@test.com") {

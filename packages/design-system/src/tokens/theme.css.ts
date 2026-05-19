@@ -67,6 +67,7 @@ const colors = {
 	black: "#000000",
 	transparent: "transparent",
 	backdrop: "rgba(25, 28, 29, 0.4)",
+	warning: "#d87c00",
 } as const;
 
 const spacing = {

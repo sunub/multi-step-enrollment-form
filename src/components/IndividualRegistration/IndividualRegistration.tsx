@@ -2,9 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Flex, Surface, Text } from "@shared/design-system";
-import { useAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import type React from "react";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import {
 	FormProvider,
 	useController,
@@ -13,8 +13,14 @@ import {
 	useWatch,
 } from "react-hook-form";
 import { MdBadge } from "react-icons/md";
-import { individualRegistrationAtom } from "@/src/enrollment";
+import {
+	individualRegistrationAtom,
+	individualRegistrationInitialData,
+	removeIndividualRegistrationDataAtom,
+} from "@/src/enrollment";
+import { useBlocker } from "@/src/hooks/useBlocker";
 import { TextField } from "../TextField/TextField";
+import { usePersistIndividualRegistrationSnapshot } from "./hooks/usePersistIndividualRegistrationSnapshot";
 import * as styles from "./IndividualRegistration.css";
 import {
 	type IndividualApplicationData,
@@ -27,7 +33,8 @@ interface IndividualRegistrationProps {
 	onPrev: () => void;
 }
 
-// --- 1. 헤더 영역 ---
+const LEAVE_PAGE_MESSAGE = "작성 중인 내용이 있습니다. 정말 나가시겠습니까?";
+
 const FormHeader: React.FC = () => (
 	<header className={styles.headerContainer}>
 		<h1 className={styles.headerTitle}>수강생 정보 입력</h1>
@@ -37,9 +44,9 @@ const FormHeader: React.FC = () => (
 	</header>
 );
 
-// --- 2. 지원 동기 필드 (Textarea) ---
 const MotivationField: React.FC = () => {
 	const { control } = useFormContext<IndividualApplicationData>();
+	const persistSnapshot = usePersistIndividualRegistrationSnapshot();
 	const {
 		field,
 		fieldState: { error },
@@ -72,6 +79,10 @@ const MotivationField: React.FC = () => {
 				rows={4}
 				placeholder="본 과정에 지원하게 된 계기나 목표를 자유롭게 작성해 주세요."
 				maxLength={maxLength}
+				onBlur={() => {
+					field.onBlur();
+					persistSnapshot();
+				}}
 			/>
 			{error && (
 				<Text color="error" variant="labelSm" marginTop={1}>
@@ -87,6 +98,7 @@ const StudentInfoSection = () => {
 		control,
 		formState: { errors },
 	} = useFormContext<IndividualApplicationData>();
+	const persistSnapshot = usePersistIndividualRegistrationSnapshot();
 
 	const { field: nameField } = useController({
 		control,
@@ -130,7 +142,14 @@ const StudentInfoSection = () => {
 
 			<div className={styles.formGrid}>
 				<TextField
-					{...nameField}
+					name={nameField.name}
+					ref={nameField.ref}
+					value={nameField.value ?? ""}
+					onChange={nameField.onChange}
+					onBlur={() => {
+						nameField.onBlur();
+						persistSnapshot();
+					}}
 					labelContent="성함을 입력해주세요"
 					isError={!!errors.name}
 					helperText={errors.name?.message}
@@ -138,7 +157,14 @@ const StudentInfoSection = () => {
 				/>
 
 				<TextField
-					{...emailField}
+					name={emailField.name}
+					ref={emailField.ref}
+					value={emailField.value ?? ""}
+					onChange={emailField.onChange}
+					onBlur={() => {
+						emailField.onBlur();
+						persistSnapshot();
+					}}
 					labelContent="이메일을 입력해주세요"
 					type="email"
 					isError={!!errors.email}
@@ -147,7 +173,14 @@ const StudentInfoSection = () => {
 				/>
 
 				<TextField
-					{...phoneField}
+					name={phoneField.name}
+					ref={phoneField.ref}
+					value={phoneField.value ?? ""}
+					onChange={phoneField.onChange}
+					onBlur={() => {
+						phoneField.onBlur();
+						persistSnapshot();
+					}}
 					labelContent="연락처를 입력해주세요"
 					type="tel"
 					isError={!!errors.phone}
@@ -169,36 +202,69 @@ export const IndividualRegistration = ({
 	onPrev,
 }: IndividualRegistrationProps) => {
 	const [liveAtomState, setLiveAtomState] = useAtom(individualRegistrationAtom);
-
 	const methods = useForm<IndividualApplicationData>({
 		resolver: zodResolver(individualApplicationSchema),
 		defaultValues: liveAtomState,
 		mode: "onChange",
 	});
+	const removeIndividualData = useSetAtom(removeIndividualRegistrationDataAtom);
 
 	const {
+		control,
 		formState: { isDirty },
-		getValues,
 		handleSubmit,
 		reset,
 	} = methods;
 
+	const watchedValues = useWatch({
+		control,
+		defaultValue: liveAtomState,
+	});
+	const shouldBlockNavigation = !isSameIndividualApplicationData(
+		watchedValues,
+		individualRegistrationInitialData,
+	);
+
+	useBlocker({
+		shouldBlock: shouldBlockNavigation,
+		message: LEAVE_PAGE_MESSAGE,
+		onBlock: () => {
+			removeIndividualData();
+			reset(individualRegistrationInitialData);
+		},
+	});
+
+	const lastSyncedRef = useRef(liveAtomState);
+
 	useEffect(() => {
-		const currentValues = getValues();
-		if (
-			isDirty ||
-			isSameIndividualApplicationData(liveAtomState, currentValues)
-		) {
+		if (isDirty) {
+			return;
+		}
+
+		if (isSameIndividualApplicationData(lastSyncedRef.current, liveAtomState)) {
 			return;
 		}
 
 		reset(liveAtomState);
-	}, [getValues, isDirty, liveAtomState, reset]);
+		lastSyncedRef.current = liveAtomState;
+	}, [isDirty, liveAtomState, reset]);
 
 	const onSubmit = (data: IndividualApplicationData) => {
 		setLiveAtomState(data);
-		console.log("Individual Registration Data:", data);
 		onNext();
+	};
+
+	const handlePrevClick = () => {
+		if (shouldBlockNavigation && !window.confirm(LEAVE_PAGE_MESSAGE)) {
+			return;
+		}
+
+		if (shouldBlockNavigation) {
+			removeIndividualData();
+			reset(individualRegistrationInitialData);
+		}
+
+		onPrev();
 	};
 
 	return (
@@ -218,12 +284,13 @@ export const IndividualRegistration = ({
 							<Surface
 								as="button"
 								type="button"
-								onClick={onPrev}
+								onClick={handlePrevClick}
 								padding={2}
 								borderRadius="md"
 								style={{ cursor: "pointer" }}
+								aria-label="이전 단계로 이동"
 							>
-								이전
+								이전 단계로 이동
 							</Surface>
 							<Surface
 								as="button"
@@ -232,8 +299,9 @@ export const IndividualRegistration = ({
 								borderRadius="md"
 								tone="primaryContainer"
 								style={{ cursor: "pointer" }}
+								aria-label="다음 단계로 이동"
 							>
-								다음
+								다음 단계로 이동
 							</Surface>
 						</Box>
 					</Box>

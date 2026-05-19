@@ -1,4 +1,5 @@
 import type { CourseType } from "@shared/types";
+import { atom } from "jotai";
 import { atomWithStorage, createJSONStorage } from "jotai/utils";
 import type { GroupApplicationData } from "../components/GroupRegistrationStep/types";
 import type { IndividualApplicationData } from "../components/IndividualRegistration/types";
@@ -114,3 +115,38 @@ export const individualRegistrationAtom =
 		storage,
 		{ getOnInit: false },
 	);
+
+export const clearIncompatibleRegistrationDataAtom = atom(
+	null,
+	(get, set, targetType: EnrollmentType) => {
+		if (targetType === "personal") {
+			set(groupRegistrationAtom, groupRegistrationInitialData);
+		} else if (targetType === "group") {
+			set(individualRegistrationAtom, individualRegistrationInitialData);
+
+			const currentForm = get(enrollmentFormAtom);
+			set(enrollmentFormAtom, {
+				...currentForm,
+				applicant: { name: "", email: "", phone: "" },
+			});
+		}
+	},
+);
+
+export const removeEnrollmentFormDataAtom = atom(null, (_get, set) => {
+	set(enrollmentFormAtom, initialData);
+});
+
+export const removeGroupRegistrationDataAtom = atom(null, (_get, set) => {
+	set(groupRegistrationAtom, groupRegistrationInitialData);
+});
+
+export const removeIndividualRegistrationDataAtom = atom(null, (_get, set) => {
+	set(individualRegistrationAtom, individualRegistrationInitialData);
+});
+
+export const clearAllRegistrationDataAtom = atom(null, (_get, set) => {
+	set(enrollmentFormAtom, initialData);
+	set(groupRegistrationAtom, groupRegistrationInitialData);
+	set(individualRegistrationAtom, individualRegistrationInitialData);
+});

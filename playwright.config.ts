@@ -81,9 +81,7 @@ export default defineConfig({
 			timeout: 120_000,
 		},
 		{
-			command: process.env.CI
-				? "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run start"
-				: "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run dev:next",
+			command: "PORT=3005 API_BASE_URL=http://127.0.0.1:3101 pnpm run start",
 			url: "http://127.0.0.1:3005",
 			reuseExistingServer: !process.env.CI,
 			timeout: 120_000,
