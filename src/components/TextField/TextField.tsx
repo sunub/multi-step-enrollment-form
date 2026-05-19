@@ -95,11 +95,12 @@ export function TextField({
 
 	const descriptionIds =
 		[
-			isError && errorMessageId ? errorMessageId : null,
-			helperText ? helperId : null,
+			!isError && helperText ? helperId : null,
 		]
 			.filter(Boolean)
 			.join(" ") || undefined;
+
+	const errorId = isError && (errorMessageId || helperId) ? (errorMessageId || helperId) : undefined;
 
 	return (
 		<Flex direction="column" gap={4} style={{ width: "100%" }}>
@@ -112,6 +113,7 @@ export function TextField({
 						})}
 					>
 						{labelContent}
+						{props.required && <span aria-hidden="true"> *</span>}
 					</label>
 					{leftIcon && (
 						<div className={style.iconWrapper({ isTyping: isFocused })}>
@@ -127,6 +129,7 @@ export function TextField({
 						value={displayValue}
 						aria-invalid={isError}
 						aria-describedby={descriptionIds}
+						aria-errormessage={errorId}
 						onChange={handleInputChange}
 						onFocus={(e) => {
 							setIsFocused(true);
@@ -154,7 +157,8 @@ export function TextField({
 				</div>
 				{helperText && (
 					<div
-						id={helperId}
+						id={errorId || helperId}
+						role={isError ? "alert" : undefined}
 						className={style.errorText({ isVisible: isError })}
 						data-testid={errorMessageId}
 					>
