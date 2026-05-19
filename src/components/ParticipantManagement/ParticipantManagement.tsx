@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Flex, Text } from "@shared/design-system";
+import clsx from "clsx";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
@@ -12,6 +13,8 @@ import { TextField } from "../TextField/TextField";
 import * as styles from "./ParticipantManagement.css";
 
 const PARTICIPANT_COUNT_DEBOUNCE_MS = 500;
+const MIN_PARTICIPANTS = 2;
+const MAX_PARTICIPANTS = 10;
 
 export const ParticipantManagement: React.FC = () => {
 	const mounted = useMounted();
@@ -52,23 +55,16 @@ export const ParticipantManagement: React.FC = () => {
 	const commitParticipantCount = useCallback(
 		(value: string) => {
 			if (value === "") {
-				setPendingParticipantCount(String(participantCountField.value ?? ""));
 				return;
 			}
 
 			const parsedValue = Number(value);
 			if (Number.isNaN(parsedValue)) {
-				setPendingParticipantCount(String(participantCountField.value ?? ""));
 				return;
 			}
 
-			const normalizedValue = Math.min(10, Math.max(2, parsedValue));
-			if (normalizedValue !== parsedValue) {
-				setPendingParticipantCount(String(normalizedValue));
-			}
-
-			if (normalizedValue !== Number(participantCountField.value)) {
-				participantCountField.onChange(normalizedValue);
+			if (parsedValue !== Number(participantCountField.value)) {
+				participantCountField.onChange(parsedValue);
 			}
 		},
 		[participantCountField],
@@ -83,6 +79,8 @@ export const ParticipantManagement: React.FC = () => {
 			window.clearTimeout(timerId);
 		};
 	}, [pendingParticipantCount, commitParticipantCount]);
+
+	const participantCountError = errors.groupInfo?.participantCount;
 
 	return (
 		<Box width={"full"}>
@@ -124,9 +122,14 @@ export const ParticipantManagement: React.FC = () => {
 						className={styles.totalCountContainer}
 						width={"full"}
 					>
-						<Flex direction="row" gap={0.5} style={{ flex: 1 }}>
+						<Flex
+							direction="row"
+							gap={1}
+							style={{ flex: 1 }}
+							alignItems="center"
+						>
 							<Text variant="labelMd" color="onSurfaceVariant">
-								총 인원수
+								신청 인원
 							</Text>
 							<Text variant="bodySm" color="onSurfaceVariant" marginTop={0.5}>
 								등록 필요 인원:{" "}
@@ -141,32 +144,43 @@ export const ParticipantManagement: React.FC = () => {
 							</Text>
 						</Flex>
 
-						<input
-							className={styles.totalCountInput}
-							type="number"
-							inputMode="numeric"
-							name={participantCountField.name}
-							ref={participantCountField.ref}
-							value={pendingParticipantCount}
-							onChange={(event) => {
-								setPendingParticipantCount(event.target.value);
-							}}
-							onFocus={() => {
-								isParticipantCountFocusedRef.current = true;
-							}}
-							onBlur={() => {
-								isParticipantCountFocusedRef.current = false;
-								participantCountField.onBlur();
-								commitParticipantCount(pendingParticipantCount);
-							}}
-							placeholder="인원수"
-							min="2"
-							max="10"
-							step="1"
-							aria-label="참가할 총 인원수"
-							required
-							aria-required="true"
-						/>
+						<div className={styles.inputValidationContainer}>
+							<input
+								data-testid="participant-count-input"
+								className={clsx(
+									styles.totalCountInput,
+									participantCountError && styles.totalCountInputError,
+								)}
+								type="number"
+								inputMode="numeric"
+								name={participantCountField.name}
+								ref={participantCountField.ref}
+								value={pendingParticipantCount}
+								onChange={(event) => {
+									setPendingParticipantCount(event.target.value);
+								}}
+								onFocus={() => {
+									isParticipantCountFocusedRef.current = true;
+								}}
+								onBlur={() => {
+									isParticipantCountFocusedRef.current = false;
+									participantCountField.onBlur();
+									commitParticipantCount(pendingParticipantCount);
+								}}
+								placeholder="인원수"
+								min={MIN_PARTICIPANTS}
+								max={MAX_PARTICIPANTS}
+								step="1"
+								aria-label="신청 인원"
+								required
+								aria-required="true"
+							/>
+							{participantCountError && (
+								<span className={styles.errorMessage} role="alert">
+									{participantCountError.message}
+								</span>
+							)}
+						</div>
 					</Flex>
 				</Flex>
 			</div>

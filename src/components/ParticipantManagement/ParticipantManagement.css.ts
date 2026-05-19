@@ -50,10 +50,32 @@ export const totalCountInput = style({
 	fontSize: vars.textStyle.bodyMd.fontSize,
 	fontWeight: vars.typography.weight.bold,
 	color: vars.color.onSurface,
+	transition: "all 0.2s ease",
 	":focus": {
 		outline: "none",
 		boxShadow: `0 0 0 2px ${vars.color.primaryFixed}`,
 	},
+});
+
+export const totalCountInputError = style({
+	borderColor: vars.color.error,
+	":focus": {
+		boxShadow: `0 0 0 2px ${vars.color.errorContainer}`,
+	},
+});
+
+export const inputValidationContainer = style({
+	display: "flex",
+	flexDirection: "column",
+	alignItems: "flex-end",
+	gap: vars.space[0.5],
+});
+
+export const errorMessage = style({
+	color: vars.color.error,
+	fontSize: vars.textStyle.labelSm.fontSize,
+	fontWeight: vars.typography.weight.medium,
+	whiteSpace: "nowrap",
 });
 
 export const chipButton = style({
