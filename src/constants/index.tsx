@@ -1,7 +1,12 @@
-import { FaCode } from "react-icons/fa";
-import { MdOutlineDesignServices } from "react-icons/md";
+import { FaCheckCircle, FaCode, FaMoneyCheckAlt } from "react-icons/fa";
 import { IoIosBusiness } from "react-icons/io";
-import { FaMoneyCheckAlt } from "react-icons/fa";
+import {
+  MdFactCheck,
+  MdGroups,
+  MdMenuBook,
+  MdOutlineDesignServices,
+  MdPerson,
+} from "react-icons/md";
 
 export const API_ENDPOINTS = {
   COURSES: "/api/courses",
@@ -19,8 +24,8 @@ export function resolveApiUrl(path: string) {
   return baseUrl ? new URL(path, baseUrl).toString() : path;
 }
 
-export const INTERNAL_API_ENDPOINTS = {
-  COURSES: "/internal-api/courses",
+export const INTERNAL_URL = {
+  success: "/courses/success",
 } as const;
 
 export const COURSE_CATEGORIES = [
@@ -38,8 +43,16 @@ export const CATEGORY_COURSE_URLS = {
 };
 
 export const categoryIconMap = {
-  development: () => <FaCode size={24} />,
-  design: () => <MdOutlineDesignServices size={24} />,
-  marketing: () => <FaMoneyCheckAlt size={24} />,
-  business: () => <IoIosBusiness size={24} />,
+  development: FaCode,
+  design: MdOutlineDesignServices,
+  marketing: FaMoneyCheckAlt,
+  business: IoIosBusiness,
+} as const;
+
+export const ICON_MAP = {
+  menu_book: MdMenuBook,
+  person: MdPerson,
+  groups: MdGroups,
+  fact_check: MdFactCheck,
+  check: FaCheckCircle,
 } as const;
