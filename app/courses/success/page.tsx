@@ -34,7 +34,6 @@ export default function EnrollmentSucces() {
 				</div>
 
 				<h1 className={styles.titleText}>수강 신청이 완료되었습니다</h1>
-				<p className={styles.subtitleText}>sdf님의 등록이 완료되었습니다!</p>
 
 				<p className={styles.descriptionText}>
 					이제 다시 메인 페이지로 돌아가셔도 됩니다.
