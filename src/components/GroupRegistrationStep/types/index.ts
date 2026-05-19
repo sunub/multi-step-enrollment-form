@@ -34,8 +34,8 @@ export const groupInfoSchema = z.object({
 		.max(20, { error: "담당자 이름은 20자 이하이어야 합니다." }),
 	participantCount: z
 		.number()
-		.min(2, { error: "신청 인원은 최소 2명입니다." })
-		.max(10, { error: "신청 인원은 최대 10명입니다." }),
+		.min(2, { error: "신청 인원은 2명에서 10명 사이로 입력해주세요." })
+		.max(10, { error: "신청 인원은 2명에서 10명 사이로 입력해주세요." }),
 });
 
 export const participantSchema = z.object({
@@ -88,25 +88,85 @@ export type GroupInfoData = z.infer<typeof groupInfoSchema>;
 export type ParticipantData = z.infer<typeof participantSchema>;
 export type GroupApplicationData = z.infer<typeof groupApplicationSchema>;
 
+const DEFAULT_PARTICIPANT_COUNT = 2;
+
+function normalizeRepresentative(
+	representative?: Partial<RepresentativeData>,
+): RepresentativeData {
+	return {
+		name: representative?.name?.trim() ?? "",
+		email: representative?.email?.trim().toLowerCase() ?? "",
+		phone: representative?.phone?.trim() ?? "",
+		motivation: representative?.motivation?.trim() ?? "",
+	};
+}
+
+function normalizeGroupInfo(groupInfo?: Partial<GroupInfoData>): GroupInfoData {
+	const participantCountValue = groupInfo?.participantCount;
+
+	return {
+		groupName: groupInfo?.groupName?.trim() ?? "",
+		managerName: groupInfo?.managerName?.trim() ?? "",
+		participantCount:
+			typeof participantCountValue === "number" &&
+			!Number.isNaN(participantCountValue)
+				? participantCountValue
+				: DEFAULT_PARTICIPANT_COUNT,
+	};
+}
+
+function normalizeParticipants(
+	participants?: Partial<ParticipantData>[],
+): ParticipantData[] {
+	return (participants ?? []).map((participant) => ({
+		name: participant.name?.trim() ?? "",
+		email: participant.email?.trim().toLowerCase() ?? "",
+	}));
+}
+
+export function normalizeGroupApplicationData(values?: {
+	representative?: Partial<RepresentativeData> | null;
+	groupInfo?: Partial<GroupInfoData> | null;
+	participants?: Partial<ParticipantData>[] | null;
+}): GroupApplicationData {
+	return {
+		representative: normalizeRepresentative(
+			values?.representative ?? undefined,
+		),
+		groupInfo: normalizeGroupInfo(values?.groupInfo ?? undefined),
+		participants: normalizeParticipants(values?.participants ?? undefined),
+	};
+}
+
 export function isSameGroupApplicationData(
-	left: GroupApplicationData,
-	right: GroupApplicationData,
+	left: Parameters<typeof normalizeGroupApplicationData>[0],
+	right: Parameters<typeof normalizeGroupApplicationData>[0],
 ) {
+	const normalizedLeft = normalizeGroupApplicationData(left);
+	const normalizedRight = normalizeGroupApplicationData(right);
+
 	if (
-		left.representative.name !== right.representative.name ||
-		left.representative.email !== right.representative.email ||
-		left.representative.phone !== right.representative.phone ||
-		left.representative.motivation !== right.representative.motivation ||
-		left.groupInfo.groupName !== right.groupInfo.groupName ||
-		left.groupInfo.managerName !== right.groupInfo.managerName ||
-		left.groupInfo.participantCount !== right.groupInfo.participantCount ||
-		left.participants.length !== right.participants.length
+		normalizedLeft.representative.name !==
+			normalizedRight.representative.name ||
+		normalizedLeft.representative.email !==
+			normalizedRight.representative.email ||
+		normalizedLeft.representative.phone !==
+			normalizedRight.representative.phone ||
+		normalizedLeft.representative.motivation !==
+			normalizedRight.representative.motivation ||
+		normalizedLeft.groupInfo.groupName !==
+			normalizedRight.groupInfo.groupName ||
+		normalizedLeft.groupInfo.managerName !==
+			normalizedRight.groupInfo.managerName ||
+		normalizedLeft.groupInfo.participantCount !==
+			normalizedRight.groupInfo.participantCount ||
+		normalizedLeft.participants.length !== normalizedRight.participants.length
 	) {
 		return false;
 	}
 
-	return left.participants.every((participant, index) => {
-		const otherParticipant = right.participants[index];
+	return normalizedLeft.participants.every((participant, index) => {
+		const otherParticipant = normalizedRight.participants[index];
 
 		return (
 			participant.name === otherParticipant?.name &&
