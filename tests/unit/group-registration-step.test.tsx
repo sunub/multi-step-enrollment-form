@@ -127,6 +127,41 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				).not.toBeInTheDocument();
 			});
 		});
+
+		it("참가자 수가 범위를 벗어날 경우 에러 메시지를 표시한다", async () => {
+			render(
+				<Provider>
+					<GroupRegistrationStep onNext={mockOnNext} onPrev={mockOnPrev} />
+				</Provider>,
+			);
+
+			const countInput = await screen.findByLabelText("참가할 총 인원수");
+
+			// 11명으로 설정 (범위 초과)
+			fireEvent.change(countInput, { target: { value: "11" } });
+
+			// Debounce 및 Validation 대기
+			await waitFor(
+				() => {
+					expect(
+						screen.getByText("신청 인원은 2명에서 10명 사이로 입력해주세요."),
+					).toBeInTheDocument();
+				},
+				{ timeout: 2000 },
+			);
+
+			// 1명으로 설정 (범위 미만)
+			fireEvent.change(countInput, { target: { value: "1" } });
+
+			await waitFor(
+				() => {
+					expect(
+						screen.getByText("신청 인원은 2명에서 10명 사이로 입력해주세요."),
+					).toBeInTheDocument();
+				},
+				{ timeout: 2000 },
+			);
+		});
 	});
 
 	describe("동적 필드 관리 (Dynamic Fields)", () => {
