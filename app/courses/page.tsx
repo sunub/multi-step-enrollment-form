@@ -1,79 +1,81 @@
 "use client";
 
-import { Box, Surface, Text } from "@shared/design-system";
-import { useAtom } from "jotai";
-import { Suspense } from "react";
-import { enrollmentFormAtom } from "@/src/enrollment/atoms";
-import { CourseSelectionStep } from "@/src/enrollment/components";
+import { Box } from "@shared/design-system";
+import { useAtomValue } from "jotai";
+import { useRouter } from "next/navigation";
+import { Suspense, useMemo } from "react";
+import { CourseSelectionStep } from "@/src/components/CourseSelectionStep";
+import { GroupRegistrationStep } from "@/src/components/GroupRegistrationStep";
+import { IndividualRegistration } from "@/src/components/IndividualRegistration";
+import { ProgressSection } from "@/src/components/ProgressSection/ProgressSection";
+import { SummaryDetailsStep } from "@/src/components/SummaryDetailsStep";
+import { INTERNAL_URL } from "@/src/constants";
+import {
+	enrollmentFormAtom,
+	groupRegistrationAtom,
+	individualRegistrationAtom,
+} from "@/src/enrollment/atoms";
 import { useFunnel } from "@/src/funnel";
+import { useMounted } from "@/src/hooks/useMounted";
+import { type CoursesFunnelState, steps } from "./funeelConfig";
 
 function EnrollmentFunnel() {
-	const [formData] = useAtom(enrollmentFormAtom);
+	const isMounted = useMounted();
+	const enrollmentForm = useAtomValue(enrollmentFormAtom);
+	const individualRegistration = useAtomValue(individualRegistrationAtom);
+	const groupRegistration = useAtomValue(groupRegistrationAtom);
+	const router = useRouter();
+	const funnelState = useMemo<CoursesFunnelState>(
+		() => ({
+			enrollmentForm,
+			individualRegistration,
+			groupRegistration,
+		}),
+		[enrollmentForm, groupRegistration, individualRegistration],
+	);
 
-	const steps = [
-		{ id: "course-selection" },
-		{ id: "applicant-info" },
-		{ id: "review" },
-	];
+	const funnel = useFunnel<CoursesFunnelState>(
+		isMounted ? steps : [],
+		funnelState,
+	);
+	if (!isMounted) {
+		return (
+			<Box padding={10} textAlign="center">
+				상태를 불러오는 중입니다...
+			</Box>
+		);
+	}
 
-	const funnel = useFunnel(steps, formData);
+	if (funnel.currentIndex === -1) {
+		return null;
+	}
 
+	const currentStep =
+		funnel.currentIndex >= 0 ? funnel.activeSteps[funnel.currentIndex] : null;
 	return (
 		<Box padding={4}>
-			<Surface marginBottom={6} padding={4} borderRadius="lg" tone="surface">
-				<Text variant="headlineLg">
-					수강 신청 ({funnel.currentIndex + 1} / {funnel.activeSteps.length})
-				</Text>
-				<Text variant="bodyMd" color="onSurfaceVariant">
-					현재 단계: {funnel.currentStepId}
-				</Text>
-			</Surface>
+			<ProgressSection progress={funnel.progress} />
 
-			{funnel.currentStepId === "course-selection" && (
+			{currentStep?.id === "course-selection" && (
 				<CourseSelectionStep onNext={funnel.next} />
 			)}
 
-			{funnel.currentStepId === "applicant-info" && (
-				<Box padding={10} textAlign="center">
-					<Text variant="headlineMd">수강생 정보 입력 스텝 (구현 예정)</Text>
-					<Box marginTop={4} display="flex" gap={2} justifyContent="center">
-						<Surface as="button" onClick={funnel.prev} padding={2}>
-							이전
-						</Surface>
-						<Surface as="button" onClick={funnel.next} padding={2}>
-							다음
-						</Surface>
-					</Box>
-				</Box>
+			{currentStep?.id === "group-member-registration" && (
+				<GroupRegistrationStep onNext={funnel.next} onPrev={funnel.prev} />
 			)}
 
-			{funnel.currentStepId === "review" && (
-				<Box padding={10} textAlign="center">
-					<Text variant="headlineMd">최종 확인 스텝 (구현 예정)</Text>
-					<Box marginTop={4} display="flex" gap={2} justifyContent="center">
-						<Surface as="button" onClick={funnel.prev} padding={2}>
-							이전
-						</Surface>
-						<Surface as="button" onClick={funnel.next} padding={2}>
-							제출
-						</Surface>
-					</Box>
-				</Box>
+			{currentStep?.id === "individual-member-registration" && (
+				<IndividualRegistration onNext={funnel.next} onPrev={funnel.prev} />
 			)}
 
-			{funnel.currentStepId === "complete" && (
-				<Box padding={10} textAlign="center">
-					<Text variant="headlineMd">신청 완료! (구현 예정)</Text>
-					<Box marginTop={4}>
-						<Surface
-							as="button"
-							onClick={() => funnel.navigateTo("course-selection")}
-							padding={2}
-						>
-							처음으로 돌아가기
-						</Surface>
-					</Box>
-				</Box>
+			{currentStep?.id === "review" && (
+				<SummaryDetailsStep
+					navigateTo={funnel.navigateTo}
+					onPrev={funnel.prev}
+					onComplete={() => {
+						router.push(INTERNAL_URL.success);
+					}}
+				/>
 			)}
 		</Box>
 	);
