@@ -15,13 +15,12 @@ import {
   vars,
 } from "@shared/design-system";
 import type { CourseCategoryType } from "@shared/types";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtomValue, useSetAtom } from "jotai";
 import type React from "react";
 import { useRef, useState } from "react";
 import { IoIosWarning } from "react-icons/io";
 import {
   clearIncompatibleRegistrationDataAtom,
-  enrollmentFormAtom,
   groupRegistrationAtom,
   individualRegistrationAtom,
   type SelectedCourseSnapshot,
@@ -58,7 +57,6 @@ export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
   isNextDisabled,
 }) => {
   const mounted = useMounted();
-  const formAtom = useAtomValue(enrollmentFormAtom);
   const individualData = useAtomValue(individualRegistrationAtom);
   const groupAtom = useAtomValue(groupRegistrationAtom);
   const clearIncompatibleData = useSetAtom(
