@@ -21,6 +21,10 @@ export const phoneSchema = z
 		return val;
 	});
 
+export const motivationSchema = z
+	.string()
+	.max(300, { error: "수강 동기는 300자 이하로 작성해야 합니다." });
+
 export const groupNameSchema = z
 	.string()
 	.min(1, { error: "단체명은 필수 입력 항목입니다." });
@@ -29,24 +33,41 @@ export const individualApplicationSchema = z.object({
 	name: usernameSchema,
 	email: emailSchema,
 	phone: phoneSchema,
-	motivation: z
-		.string()
-		.max(300, { error: "수강 동기는 300자 이하로 작성해야 합니다." })
-		.optional(),
+	motivation: motivationSchema.optional(),
 });
 
 export type IndividualApplicationData = z.infer<
 	typeof individualApplicationSchema
 >;
 
+function normalizePhone(phone: string) {
+	const parsedPhone = phoneSchema.safeParse(phone.trim());
+
+	return parsedPhone.success ? parsedPhone.data : phone.trim();
+}
+
+export function normalizeIndividualApplicationData(
+	values?: Partial<IndividualApplicationData>,
+): IndividualApplicationData {
+	return {
+		name: values?.name?.trim() ?? "",
+		email: values?.email?.trim().toLowerCase() ?? "",
+		phone: normalizePhone(values?.phone ?? ""),
+		motivation: values?.motivation?.trim() ?? "",
+	};
+}
+
 export function isSameIndividualApplicationData(
-	left: IndividualApplicationData,
-	right: IndividualApplicationData,
+	left: Partial<IndividualApplicationData>,
+	right: Partial<IndividualApplicationData>,
 ) {
+	const normalizedLeft = normalizeIndividualApplicationData(left);
+	const normalizedRight = normalizeIndividualApplicationData(right);
+
 	return (
-		left.name === right.name &&
-		left.email === right.email &&
-		left.phone === right.phone &&
-		left.motivation === right.motivation
+		normalizedLeft.name === normalizedRight.name &&
+		normalizedLeft.email === normalizedRight.email &&
+		normalizedLeft.phone === normalizedRight.phone &&
+		normalizedLeft.motivation === normalizedRight.motivation
 	);
 }
