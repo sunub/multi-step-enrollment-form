@@ -1,15 +1,16 @@
 "use client";
 
-import { Button } from "@shared/design-system";
+import { Button, Grid } from "@shared/design-system";
 import Link from "next/link";
 
 export default function Home() {
 	return (
-		<div>
-			<h1>Hello world!</h1>
-			<Button asChild>
-				<Link href="/courses/development">Go to courses</Link>
+		<Grid placeItems={"center"}>
+			<Button asChild variant="primary" size="lg">
+				<Link href="/courses" className="text-blue-500 underline">
+					강의 신청 페이지로 이동하기
+				</Link>
 			</Button>
-		</div>
+		</Grid>
 	);
 }
