@@ -19,6 +19,7 @@ export function useFunnel<T>(
 	const router = useRouter();
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
+	const totalLength = steps.length;
 
 	const activeSteps = useMemo(() => {
 		return steps.filter(
@@ -43,9 +44,11 @@ export function useFunnel<T>(
 	}, [currentIndex, activeSteps, pathname, router, searchParams]);
 
 	const progress = useMemo(() => {
-		if (activeSteps.length === 0) return 0;
-		return Math.floor(((currentIndex + 1) / activeSteps.length) * 100);
-	}, [currentIndex, activeSteps.length]);
+		if (activeSteps.length === 0) {
+			return 0;
+		}
+		return Math.floor(((currentIndex + 1) / totalLength) * 100);
+	}, [currentIndex, activeSteps.length, totalLength]);
 
 	const navigateTo = useCallback(
 		(stepId: string) => {
