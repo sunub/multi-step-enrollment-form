@@ -1,11 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Surface } from "@shared/design-system";
-import { useAtom, useSetAtom } from "jotai";
-import { useEffect, useRef } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { Box, Button } from "@shared/design-system";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useRef, useState } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
+import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import {
+	enrollmentFormAtom,
 	individualRegistrationAtom,
 	individualRegistrationInitialData,
 	removeIndividualRegistrationDataAtom,
@@ -41,20 +44,31 @@ export const IndividualRegistration = ({
 	const removeIndividualData = useSetAtom(removeIndividualRegistrationDataAtom);
 
 	const {
-		control,
 		formState: { isDirty },
 		handleSubmit,
 		reset,
 	} = methods;
 
-	const watchedValues = useWatch({
-		control,
-		defaultValue: liveAtomState,
-	});
-	const shouldBlockNavigation = !isSameIndividualApplicationData(
-		watchedValues,
-		individualRegistrationInitialData,
+	const [shouldBlockNavigation, setShouldBlockNavigation] = useState(
+		() =>
+			!isSameIndividualApplicationData(
+				liveAtomState,
+				individualRegistrationInitialData,
+			),
 	);
+
+	useEffect(() => {
+		const subscription = methods.watch((value) => {
+			const isDirtyVal = !isSameIndividualApplicationData(
+				value as IndividualApplicationData,
+				individualRegistrationInitialData,
+			);
+			if (isDirtyVal !== shouldBlockNavigation) {
+				setShouldBlockNavigation(isDirtyVal);
+			}
+		});
+		return () => subscription.unsubscribe();
+	}, [methods.watch, shouldBlockNavigation]);
 
 	useBlocker({
 		shouldBlock: shouldBlockNavigation,
@@ -98,9 +112,11 @@ export const IndividualRegistration = ({
 		onPrev();
 	};
 
+	const enrollmentForm = useAtomValue(enrollmentFormAtom);
+
 	return (
-		<main className={styles.mainWrapper}>
-			<div className={styles.formContainer}>
+		<EnrollmentLayout>
+			<EnrollmentLayout.Main>
 				<FormHeader />
 
 				<FormProvider {...methods}>
@@ -112,34 +128,31 @@ export const IndividualRegistration = ({
 						<StudentInfoSection>
 							<MotivationField />
 						</StudentInfoSection>
-
-						<Box marginTop={6} display="flex" gap={2} justifyContent="center">
-							<Surface
-								as="button"
-								type="button"
-								onClick={handlePrevClick}
-								padding={2}
-								borderRadius="md"
-								style={{ cursor: "pointer" }}
-								aria-label="이전 단계로 이동"
-							>
-								이전 단계로 이동
-							</Surface>
-							<Surface
-								as="button"
-								type="submit"
-								padding={2}
-								borderRadius="md"
-								tone="primaryContainer"
-								style={{ cursor: "pointer" }}
-								aria-label="다음 단계로 이동"
-							>
-								다음 단계로 이동
-							</Surface>
-						</Box>
 					</Box>
 				</FormProvider>
-			</div>
-		</main>
+			</EnrollmentLayout.Main>
+			<EnrollmentSidebar
+				currentStep={2}
+				totalSteps={3}
+				stepTitle="수강생 정보 입력"
+				percent={66}
+				selectedCourse={enrollmentForm.selectedCourse}
+				enrollmentType={enrollmentForm.type}
+			>
+				<Button
+					type="button"
+					variant="outline"
+					size="lg"
+					onClick={handlePrevClick}
+					style={{ width: "100%" }}
+					aria-label="이전 단계로 이동"
+				>
+					이전 단계로 이동
+				</Button>
+				<EnrollmentLayout.Action onClick={handleSubmit(onSubmit)}>
+					다음 단계로 이동
+				</EnrollmentLayout.Action>
+			</EnrollmentSidebar>
+		</EnrollmentLayout>
 	);
 };
