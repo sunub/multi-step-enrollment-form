@@ -4,7 +4,7 @@ import {
 	motivationSchema,
 	phoneSchema,
 	usernameSchema,
-} from "./types";
+} from "../types";
 
 export function hasValidIndividualRegistrationProgress(
 	values: Partial<IndividualApplicationData>,
