@@ -215,9 +215,9 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 
 			await waitFor(
 				() => {
-					expect(screen.getByText("Slot 01")).toBeInTheDocument();
-					expect(screen.getByText("Slot 06")).toBeInTheDocument();
-					expect(screen.queryByText("Slot 07")).not.toBeInTheDocument();
+					expect(screen.getByText("Slot 01")).toBeVisible();
+					expect(screen.getByText("Slot 06")).toBeVisible();
+					expect(screen.getByText("Slot 07")).not.toBeVisible();
 				},
 				{ timeout: 2000 },
 			);
@@ -229,9 +229,9 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 			// 7~10번 슬롯이 보여야 함
 			await waitFor(
 				() => {
-					expect(screen.queryByText("Slot 01")).not.toBeInTheDocument();
-					expect(screen.getByText("Slot 07")).toBeInTheDocument();
-					expect(screen.getByText("Slot 10")).toBeInTheDocument();
+					expect(screen.getByText("Slot 01")).not.toBeVisible();
+					expect(screen.getByText("Slot 07")).toBeVisible();
+					expect(screen.getByText("Slot 10")).toBeVisible();
 				},
 				{ timeout: 2000 },
 			);

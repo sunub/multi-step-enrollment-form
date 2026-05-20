@@ -145,7 +145,9 @@ test.describe("다단계 수강 신청 폼 - 1단계 강의 선택", () => {
 	test("Test 10: 선택된 강의가 없을 때 다음 단계 버튼은 비활성화된다", async ({
 		page,
 	}) => {
-		const nextStepButton = page.getByTestId("next-step-button");
+		const nextStepButton = page.getByRole("button", {
+			name: "다음 단계로 이동",
+		});
 		await expect(nextStepButton).toBeDisabled();
 	});
 
@@ -171,7 +173,9 @@ test.describe("다단계 수강 신청 폼 - 1단계 강의 선택", () => {
 			"선택된 강의: 1개",
 		);
 		await expect(page.getByTestId("summary-selected-course")).toBeVisible();
-		const nextStepButton = page.getByTestId("next-step-button");
+		const nextStepButton = page.getByRole("button", {
+			name: "다음 단계로 이동",
+		});
 		await expect(nextStepButton).toBeEnabled();
 
 		// 3. 2페이지로 이동
@@ -235,6 +239,8 @@ test.describe("다단계 수강 신청 폼 - 1단계 강의 선택", () => {
 			'input[type="radio"][value="group"]',
 		);
 		await expect(groupTypeAfterReload).toBeChecked();
-		await expect(page.getByTestId("next-step-button")).toBeEnabled();
+		await expect(
+			page.getByRole("button", { name: "다음 단계로 이동" }),
+		).toBeEnabled();
 	});
 });

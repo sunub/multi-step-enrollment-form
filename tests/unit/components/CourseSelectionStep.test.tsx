@@ -28,15 +28,19 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 	};
 });
 
-vi.mock("@/src/constants", () => ({
-	COURSE_CATEGORIES: ["development", "design", "marketing", "business"],
-	CATEGORY_COURSE_URLS: {
-		DEVELOPMENT: "/courses/development",
-		DESIGN: "/courses/design",
-		MARKETING: "/courses/marketing",
-		BUSINESS: "/courses/business",
-	},
-}));
+vi.mock("@/src/constants", async (importOriginal) => {
+	const actual = await importOriginal<typeof import("@/src/constants")>();
+	return {
+		...actual,
+		COURSE_CATEGORIES: ["development", "design", "marketing", "business"],
+		CATEGORY_COURSE_URLS: {
+			DEVELOPMENT: "/courses/development",
+			DESIGN: "/courses/design",
+			MARKETING: "/courses/marketing",
+			BUSINESS: "/courses/business",
+		},
+	};
+});
 
 vi.mock("@/src/queries/courses/coursesQueryKey", () => ({
 	getPaginatedCoursesQueryOptions: () => ({}),

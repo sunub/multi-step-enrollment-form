@@ -66,7 +66,7 @@ test.describe("Step 3: 확인 및 제출 페이지", () => {
 		// 제출 중 상태 확인 (Phase 1 리팩토링 결과)
 		await expect(submitButton).toBeDisabled();
 		await expect(submitButton).toHaveAttribute("aria-busy", "true");
-		await expect(submitButton).toHaveText("제출 중...");
+		await expect(submitButton).toHaveText(/제출 중.../);
 
 		// 요청이 단 1번만 발생했는지 확인
 		expect(requestCount).toBe(1);

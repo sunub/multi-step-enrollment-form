@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import CoursesSuccessPage from "../../../app/courses/success/page";
 import {
 	enrollmentFormAtom,
@@ -9,6 +9,13 @@ import {
 	individualRegistrationAtom,
 	individualRegistrationInitialData,
 } from "../../../src/enrollment/atoms";
+
+const mockReplace = vi.fn();
+vi.mock("next/navigation", () => ({
+	useRouter: () => ({
+		replace: mockReplace,
+	}),
+}));
 
 describe("CoursesSuccessPage", () => {
 	it("clears registration state after entering the success page", async () => {
@@ -83,5 +90,20 @@ describe("CoursesSuccessPage", () => {
 		expect(store.get(groupRegistrationAtom)).toEqual(
 			groupRegistrationInitialData,
 		);
+	});
+
+	it("redirects to courses page if accessed with empty registration state", async () => {
+		const store = createStore();
+		// enrollmentFormAtom has initialData (selectedCourse is null)
+
+		render(
+			<Provider store={store}>
+				<CoursesSuccessPage />
+			</Provider>,
+		);
+
+		await waitFor(() => {
+			expect(mockReplace).toHaveBeenCalledWith("/courses");
+		});
 	});
 });
