@@ -56,9 +56,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 			);
 
 			// Hydration 대기
-			const nameInput = await screen.findByLabelText(
-				representativeNameLabel,
-			);
+			const nameInput = await screen.findByLabelText(representativeNameLabel);
 			expect(nameInput).toHaveValue("");
 
 			const participantNameInput = screen.getByLabelText("참가자 1 이름");
@@ -91,9 +89,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				</Provider>,
 			);
 
-			const nameInput = await screen.findByLabelText(
-				representativeNameLabel,
-			);
+			const nameInput = await screen.findByLabelText(representativeNameLabel);
 
 			fireEvent.change(nameInput, { target: { value: "홍" } });
 			fireEvent.blur(nameInput);
@@ -111,9 +107,7 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 				</Provider>,
 			);
 
-			const emailInput = await screen.findByLabelText(
-				representativeEmailLabel,
-			);
+			const emailInput = await screen.findByLabelText(representativeEmailLabel);
 
 			fireEvent.change(emailInput, { target: { value: "invalid-email" } });
 			fireEvent.blur(emailInput);
@@ -268,10 +262,9 @@ describe("GroupRegistrationStep 통합 단위 테스트", () => {
 			);
 
 			// 대표자 정보 입력
-			fireEvent.change(
-				await screen.findByLabelText(representativeNameLabel),
-				{ target: { value: "홍길동" } },
-			);
+			fireEvent.change(await screen.findByLabelText(representativeNameLabel), {
+				target: { value: "홍길동" },
+			});
 			fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 				target: { value: "leader@example.com" },
 			});
