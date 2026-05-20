@@ -16,7 +16,7 @@ import {
 } from "@/src/enrollment/atoms";
 import { useFunnel } from "@/src/funnel";
 import { useMounted } from "@/src/hooks/useMounted";
-import { type CoursesFunnelState, steps } from "./funeelConfig";
+import { type CoursesFunnelState, steps } from "./funnelConfig";
 
 function EnrollmentFunnel() {
 	const isMounted = useMounted();
