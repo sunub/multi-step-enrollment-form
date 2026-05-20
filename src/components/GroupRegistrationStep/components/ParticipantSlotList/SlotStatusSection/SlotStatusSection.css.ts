@@ -4,12 +4,13 @@ import { style } from "@vanilla-extract/css";
 export const slotGrid = style({
 	display: "grid",
 	gridTemplateColumns: "1fr",
-	gap: vars.space[2],
+	gap: vars.space[4],
 	"@media": {
-		"screen and (min-width: 640px)": {
+		"screen and (min-width: 768px)": {
 			gridTemplateColumns: "repeat(2, 1fr)",
+			gap: vars.space[5],
 		},
-		"screen and (min-width: 1024px)": {
+		"screen and (min-width: 1440px)": {
 			gridTemplateColumns: "repeat(3, 1fr)",
 		},
 	},

@@ -7,12 +7,16 @@ import type { GroupApplicationData } from "../../types";
 import { SlotCard } from "./SlotCard";
 import { SlotStatusSection } from "./SlotStatusSection";
 
-const ITEMS_PER_PAGE = 6;
-
 export const ParticipantSlotList = () => {
-	const { control, setValue, watch } = useFormContext<GroupApplicationData>();
+	const {
+		control,
+		setValue,
+		watch,
+		formState: { errors },
+	} = useFormContext<GroupApplicationData>();
 	const persistSnapshot = usePersistGroupRegistrationSnapshot();
 	const [currentPage, setCurrentPage] = useState(1);
+	const [itemsPerPage, setItemsPerPage] = useState(6);
 
 	const { fields } = useFieldArray({
 		control,
@@ -26,30 +30,63 @@ export const ParticipantSlotList = () => {
 		setCurrentPage(1);
 	}, [participantCount]);
 
+	useEffect(() => {
+		const handleResize = () => {
+			const width = window.innerWidth;
+			const nextItemsPerPage = width < 1024 ? 4 : 6;
+			setItemsPerPage(nextItemsPerPage);
+		};
+
+		handleResize();
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
+
+	useEffect(() => {
+		const totalPages = Math.ceil(fields.length / itemsPerPage);
+		if (currentPage > totalPages && totalPages > 0) {
+			setCurrentPage(totalPages);
+		}
+	}, [itemsPerPage, fields.length, currentPage]);
+
+	useEffect(() => {
+		const participantErrors = errors.participants;
+		if (participantErrors && Array.isArray(participantErrors)) {
+			const firstErrorIndex = participantErrors.findIndex(
+				(err) => err !== undefined && err !== null,
+			);
+			if (firstErrorIndex !== -1) {
+				const errorPage = Math.floor(firstErrorIndex / itemsPerPage) + 1;
+				setCurrentPage(errorPage);
+			}
+		}
+	}, [errors.participants, itemsPerPage]);
+
 	const handleClear = (index: number) => {
 		setValue(`participants.${index}.name`, "");
 		setValue(`participants.${index}.email`, "");
 		persistSnapshot();
 	};
 
-	const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-	const visibleFields = fields.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+	const startIndex = (currentPage - 1) * itemsPerPage;
 
 	return (
 		<SlotStatusSection
 			totalCount={fields.length}
 			currentPage={currentPage}
-			itemsPerPage={ITEMS_PER_PAGE}
+			itemsPerPage={itemsPerPage}
 			onNextPage={() => setCurrentPage((p) => p + 1)}
 			onPrevPage={() => setCurrentPage((p) => p - 1)}
 		>
-			{visibleFields.map((field, localIndex) => {
-				const actualIndex = startIndex + localIndex;
+			{fields.map((field, index) => {
+				const isVisible =
+					index >= startIndex && index < startIndex + itemsPerPage;
 				return (
 					<SlotCard
 						key={field.id}
-						index={actualIndex}
-						onClear={() => handleClear(actualIndex)}
+						index={index}
+						onClear={() => handleClear(index)}
+						style={{ display: isVisible ? "block" : "none" }}
 					/>
 				);
 			})}

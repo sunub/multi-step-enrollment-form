@@ -1,18 +1,21 @@
-import { Box, Flex, Text } from "@shared/design-system";
+import { Flex, Text } from "@shared/design-system";
 import { MdGroups } from "react-icons/md";
 import * as styles from "../ParticipantManagement.css";
 
 export const ParticipantManagementHeader = () => {
 	return (
-		<Flex alignItems="center" gap={1}>
-			<Box className={styles.headerIcon}>
+		<div className={styles.header}>
+			<div className={styles.iconWrapper}>
 				<MdGroups size={24} />
-			</Box>
-			<Box>
-				<Text variant="headlineMd" color="onSurface">
+			</div>
+			<Flex alignItems="baseline" gap={1}>
+				<Text variant="headlineMd" color="onSurface" as="h2">
 					단체 등록 정보
 				</Text>
-			</Box>
-		</Flex>
+				<Text variant="bodySm" color="onSurfaceVariant" opacity={0.6} as="span">
+					(Group Information)
+				</Text>
+			</Flex>
+		</div>
 	);
 };

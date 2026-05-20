@@ -187,3 +187,38 @@ export const inputField = style({
 		boxShadow: `0 0 0 4px ${vars.color.primaryFixed}`,
 	},
 });
+
+export const sectionContainer = style({
+	background: "rgba(255, 255, 255, 0.75)",
+	backdropFilter: "blur(20px)",
+	WebkitBackdropFilter: "blur(20px)",
+	border: `1px solid ${vars.color.outlineVariant}`,
+	borderRadius: vars.borderRadius.xl,
+	transition: "background-color 0.3s ease",
+});
+
+export const header = style({
+	display: "flex",
+	alignItems: "center",
+	gap: vars.space[1.5],
+	marginBottom: vars.space[3],
+	borderBottom: `1px solid ${vars.color.outlineVariant}`,
+	paddingBottom: vars.space[2],
+});
+
+export const iconWrapper = style({
+	width: "40px",
+	height: "40px",
+	borderRadius: vars.borderRadius.full,
+	backgroundColor: "rgba(0, 74, 198, 0.1)", // primary/10
+	color: vars.color.primary,
+	display: "flex",
+	alignItems: "center",
+	justifyContent: "center",
+});
+
+export const groupFormGrid = style({
+	display: "flex",
+	flexDirection: "column",
+	gap: vars.space[3],
+});

@@ -1,9 +1,9 @@
 "use client";
 
-import { Box, Flex } from "@shared/design-system";
+import { Box } from "@shared/design-system";
 import { useSetAtom } from "jotai";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useController, useFormContext, useWatch } from "react-hook-form";
+import { useController, useFormContext } from "react-hook-form";
 import { groupRegistrationAtom } from "@/src/enrollment";
 import { useMounted } from "../../../../hooks/useMounted";
 import { TextField } from "../../../TextField/TextField";
@@ -41,11 +41,6 @@ export const ParticipantManagement = () => {
 	const { field: participantCountField } = useController({
 		control,
 		name: "groupInfo.participantCount",
-	});
-
-	const participants = useWatch({
-		control,
-		name: "participants",
 	});
 
 	const [pendingParticipantCount, setPendingParticipantCount] = useState(() =>
@@ -116,49 +111,52 @@ export const ParticipantManagement = () => {
 	const participantCountError = errors.groupInfo?.participantCount;
 
 	return (
-		<Box width={"full"}>
-			<div className={styles.headerContainer}>
-				<ParticipantManagementHeader />
+		<Box
+			as="section"
+			padding={{ mobile: 3, tablet: 4 }}
+			className={styles.sectionContainer}
+			marginBottom={4}
+		>
+			<ParticipantManagementHeader />
 
-				<Flex direction="column" gap={3} width="full" marginTop={2}>
-					<TextField
-						name={groupNameField.name}
-						ref={groupNameField.ref}
-						className={styles.inputField}
-						type="text"
-						labelContent="단체명을 입력해주세요."
-						value={groupNameField.value ?? ""}
-						onChange={groupNameField.onChange}
-						onBlur={() => {
-							groupNameField.onBlur();
-							persistSnapshot();
-						}}
-						autoComplete="organization"
-						aria-label="단체명"
-						isError={!!errors.groupInfo?.groupName}
-						helperText={errors.groupInfo?.groupName?.message}
-						required
-					/>
+			<div className={styles.groupFormGrid}>
+				<TextField
+					name={groupNameField.name}
+					ref={groupNameField.ref}
+					className={styles.inputField}
+					type="text"
+					labelContent="단체명을 입력해주세요."
+					value={groupNameField.value ?? ""}
+					onChange={groupNameField.onChange}
+					onBlur={() => {
+						groupNameField.onBlur();
+						persistSnapshot();
+					}}
+					autoComplete="organization"
+					aria-label="단체명"
+					isError={!!errors.groupInfo?.groupName}
+					helperText={errors.groupInfo?.groupName?.message}
+					required
+				/>
 
-					<ParticipantCountField
-						mounted={mounted}
-						registeredCount={Number(participantCountField.value) || 0}
-						createdSlotsCount={participants?.length || 0}
-						pendingCount={pendingParticipantCount}
-						onChange={setPendingParticipantCount}
-						onFocus={() => {
-							isParticipantCountFocusedRef.current = true;
-						}}
-						onBlur={() => {
-							isParticipantCountFocusedRef.current = false;
-							participantCountField.onBlur();
-							commitParticipantCount(pendingParticipantCount);
-						}}
-						error={participantCountError?.message}
-						min={MIN_PARTICIPANTS}
-						max={MAX_PARTICIPANTS}
-					/>
-				</Flex>
+				<ParticipantCountField
+					mounted={mounted}
+					registeredCount={Number(participantCountField.value) || 0}
+					createdSlotsCount={getValues("participants")?.length || 0}
+					pendingCount={pendingParticipantCount}
+					onChange={setPendingParticipantCount}
+					onFocus={() => {
+						isParticipantCountFocusedRef.current = true;
+					}}
+					onBlur={() => {
+						isParticipantCountFocusedRef.current = false;
+						participantCountField.onBlur();
+						commitParticipantCount(pendingParticipantCount);
+					}}
+					error={participantCountError?.message}
+					min={MIN_PARTICIPANTS}
+					max={MAX_PARTICIPANTS}
+				/>
 			</div>
 		</Box>
 	);

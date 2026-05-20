@@ -12,9 +12,10 @@ export type SlotStatus = "complete" | "in-progress" | "empty";
 export interface SlotCardProps {
 	index: number;
 	onClear: () => void;
+	style?: React.CSSProperties;
 }
 
-export const SlotCard = ({ index, onClear }: SlotCardProps) => {
+export const SlotCard = ({ index, onClear, style }: SlotCardProps) => {
 	const {
 		control,
 		formState: { errors },
@@ -51,7 +52,7 @@ export const SlotCard = ({ index, onClear }: SlotCardProps) => {
 	const emailError = errors.participants?.[index]?.email;
 
 	return (
-		<Box className={styles.slotContainer} style={inlineVars}>
+		<Box className={styles.slotContainer} style={{ ...inlineVars, ...style }}>
 			<button
 				type="button"
 				className={styles.clearButton}
@@ -84,11 +85,10 @@ export const SlotCard = ({ index, onClear }: SlotCardProps) => {
 					</Text>
 				</Flex>
 
-				<Flex direction="column" gap={1}>
+				<div className={styles.fieldsContainer}>
 					<TextField
 						name={participantNameField.name}
 						ref={participantNameField.ref}
-						className={styles.inputField}
 						type="text"
 						labelContent="이름 (Name)"
 						placeholder=""
@@ -107,7 +107,6 @@ export const SlotCard = ({ index, onClear }: SlotCardProps) => {
 					<TextField
 						name={participantEmailField.name}
 						ref={participantEmailField.ref}
-						className={styles.inputField}
 						type="email"
 						labelContent="이메일 (Email)"
 						value={emailValue}
@@ -122,7 +121,7 @@ export const SlotCard = ({ index, onClear }: SlotCardProps) => {
 						helperText={emailError?.message}
 						required
 					/>
-				</Flex>
+				</div>
 			</Box>
 		</Box>
 	);

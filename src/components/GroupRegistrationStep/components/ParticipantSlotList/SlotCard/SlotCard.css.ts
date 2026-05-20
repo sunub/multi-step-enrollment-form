@@ -64,18 +64,14 @@ export const clearButton = style({
 	},
 });
 
-export const inputField = style({
-	width: "100%",
-	backgroundColor: vars.color.surfaceContainerLow,
-	border: `1px solid ${vars.color.outlineVariant}`,
-	borderRadius: vars.borderRadius.md,
-	padding: `${vars.space[1]} ${vars.space[2]}`,
-	fontSize: vars.textStyle.bodySm.fontSize,
-	color: vars.color.onSurface,
-	transition: "all 0.2s ease",
-	":focus": {
-		outline: "none",
-		borderColor: vars.color.primary,
-		boxShadow: `0 0 0 1px ${vars.color.primary}`,
+export const fieldsContainer = style({
+	display: "flex",
+	flexDirection: "column",
+	gap: vars.space[5], // Default stack gap to prevent floating label overlap
+	"@media": {
+		"screen and (min-width: 480px) and (max-width: 767px)": {
+			flexDirection: "row",
+			gap: vars.space[4],
+		},
 	},
 });
