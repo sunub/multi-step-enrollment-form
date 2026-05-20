@@ -23,8 +23,7 @@ export function Grid<T extends ElementType = "div">({
 			alignItems={alignItems}
 			justifyContent={justifyContent}
 			placeItems={placeItems}
-			// biome-ignore lint/suspicious/noExplicitAny: BoxProps is generic and safe here
-			{...(props as any)}
+			{...(props as BoxProps<T>)}
 		/>
 	);
 }

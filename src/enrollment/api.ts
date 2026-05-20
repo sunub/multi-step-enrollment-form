@@ -102,9 +102,6 @@ export function isEnrollmentRequestError(
 	return error instanceof EnrollmentRequestError;
 }
 
-/**
- * Converts a ReadableStream of NDJSON to an AsyncIterable.
- */
 async function* streamToAsyncIterable<T>(
 	stream: ReadableStream<Uint8Array>,
 ): AsyncIterable<T> {
@@ -146,17 +143,15 @@ async function* streamToAsyncIterable<T>(
 	}
 }
 
-/**
- * Fetches courses from the API with client-side pagination over an NDJSON stream.
- */
 export async function fetchPaginatedCourses(
 	category: string,
 	page: number,
 	limit = 10,
+	signal?: AbortSignal,
 ) {
 	const URL = resolveApiUrl(`${API_ENDPOINTS.COURSES}?category=${category}`);
 
-	const response = await fetch(URL);
+	const response = await fetch(URL, { signal });
 	if (!response.ok) {
 		throw new Error(`Failed to fetch courses: ${response.statusText}`);
 	}

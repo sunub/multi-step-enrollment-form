@@ -30,10 +30,9 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 		);
 
 		// 필수 정보 입력
-		fireEvent.change(
-			await screen.findByLabelText(representativeNameLabel),
-			{ target: { value: "홍길동" } },
-		);
+		fireEvent.change(await screen.findByLabelText(representativeNameLabel), {
+			target: { value: "홍길동" },
+		});
 		fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 			target: { value: "leader@example.com" },
 		});
@@ -87,10 +86,9 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 		);
 
 		const leaderEmail = "leader@example.com";
-		fireEvent.change(
-			await screen.findByLabelText(representativeEmailLabel),
-			{ target: { value: leaderEmail } },
-		);
+		fireEvent.change(await screen.findByLabelText(representativeEmailLabel), {
+			target: { value: leaderEmail },
+		});
 
 		// 참가자 1 이메일을 대표자 이메일과 동일하게 입력
 		fireEvent.change(screen.getByLabelText("참가자 1 이메일"), {
@@ -112,10 +110,9 @@ describe("참가자 이메일 중복 체크 테스트", () => {
 		);
 
 		// 모든 필수 정보 및 중복된 이메일 입력
-		fireEvent.change(
-			await screen.findByLabelText(representativeNameLabel),
-			{ target: { value: "홍길동" } },
-		);
+		fireEvent.change(await screen.findByLabelText(representativeNameLabel), {
+			target: { value: "홍길동" },
+		});
 		fireEvent.change(screen.getByLabelText(representativeEmailLabel), {
 			target: { value: "leader@example.com" },
 		});

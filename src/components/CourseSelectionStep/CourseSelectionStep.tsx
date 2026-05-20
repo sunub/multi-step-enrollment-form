@@ -3,20 +3,27 @@
 import { Box, Flex, Grid, Text } from "@shared/design-system";
 import type { CourseCategoryType, CourseType } from "@shared/types";
 import { useQuery } from "@tanstack/react-query";
-import { useAtom } from "jotai";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type SubmitHandler, useController, useForm } from "react-hook-form";
+import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
+import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import {
+	clearIncompatibleRegistrationDataAtom,
 	createSelectedCourseSnapshot,
 	enrollmentFormAtom,
-	isSameSelectedCourseSnapshot,
+	groupRegistrationAtom,
+	individualRegistrationAtom,
 } from "@/src/enrollment";
 import { getPaginatedCoursesQueryOptions } from "@/src/queries/courses/coursesQueryKey";
-import { CategoryTabs } from "./sub-components/CategoryTabs";
-import { CourseCard } from "./sub-components/CourseCard";
-import { PaginationControl } from "./sub-components/PaginationControl";
-import { SelectionSummary } from "./sub-components/SelectionSummary";
+import { useMounted } from "../../hooks/useMounted";
+import { CategoryTabs, CourseCard, PaginationControl } from "./components";
+import { ParticipantTypeSelection } from "./components/ParticipanTypeSelection";
+import { PriceSummaryContent } from "./components/PriceSummaryContent";
+import { WarningAlertDialog } from "./components/WarningAlertDialog";
+
+export type EnrollmentType = "personal" | "group";
 
 interface CourseSelectionStepProps {
 	onNext: () => void;
@@ -35,8 +42,10 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 		(searchParams.get("category") as CourseCategoryType) || "development";
 
 	const [formAtom, setFormAtom] = useAtom(enrollmentFormAtom);
-	const hasInitializedSyncRef = useRef(false);
-	const isSyncingFromAtomRef = useRef(false);
+	const lastSyncedRef = useRef({
+		courseId: formAtom.courseId,
+		type: formAtom.type,
+	});
 
 	const {
 		data: paginationData,
@@ -51,13 +60,7 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 		hasPrevPage = false,
 	} = paginationData || {};
 
-	const {
-		control,
-		formState: { isDirty },
-		getValues,
-		handleSubmit,
-		reset,
-	} = useForm<CourseSelectionForm>({
+	const { reset, control, handleSubmit } = useForm<CourseSelectionForm>({
 		defaultValues: {
 			selectedCourseId: formAtom.courseId,
 			enrollmentType: formAtom.type,
@@ -65,25 +68,23 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 	});
 
 	useEffect(() => {
-		const nextValues: CourseSelectionForm = {
-			selectedCourseId: formAtom.courseId,
-			enrollmentType: formAtom.type,
-		};
-		const currentValues = getValues();
-		const isSameFormState =
-			currentValues.selectedCourseId === nextValues.selectedCourseId &&
-			currentValues.enrollmentType === nextValues.enrollmentType;
-
-		hasInitializedSyncRef.current = true;
-
-		if (isSameFormState) {
-			isSyncingFromAtomRef.current = false;
+		if (
+			lastSyncedRef.current.courseId === formAtom.courseId &&
+			lastSyncedRef.current.type === formAtom.type
+		) {
 			return;
 		}
 
-		isSyncingFromAtomRef.current = true;
-		reset(nextValues);
-	}, [getValues, reset, formAtom.courseId, formAtom.type]);
+		reset({
+			selectedCourseId: formAtom.courseId,
+			enrollmentType: formAtom.type,
+		});
+
+		lastSyncedRef.current = {
+			courseId: formAtom.courseId,
+			type: formAtom.type,
+		};
+	}, [formAtom.courseId, formAtom.type, reset]);
 
 	const { field: selectedCourseField } = useController({
 		name: "selectedCourseId",
@@ -104,56 +105,6 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 		);
 	}, [courses, selectedCourseId]);
 
-	const selectedCourseSnapshot = useMemo(() => {
-		return selectedCourseFromCurrentPage
-			? createSelectedCourseSnapshot(selectedCourseFromCurrentPage)
-			: null;
-	}, [selectedCourseFromCurrentPage]);
-
-	useEffect(() => {
-		if (!hasInitializedSyncRef.current) return;
-		if (isSyncingFromAtomRef.current) {
-			isSyncingFromAtomRef.current = false;
-			return;
-		}
-		if (!isDirty) return;
-
-		setFormAtom((prev) => {
-			const nextSelectedCourse = (() => {
-				if (!selectedCourseId) {
-					return null;
-				}
-				if (selectedCourseSnapshot) {
-					return selectedCourseSnapshot;
-				}
-				return prev.selectedCourse?.id === selectedCourseId
-					? prev.selectedCourse
-					: null;
-			})();
-
-			if (
-				prev.courseId === selectedCourseId &&
-				prev.type === enrollmentType &&
-				isSameSelectedCourseSnapshot(prev.selectedCourse, nextSelectedCourse)
-			) {
-				return prev;
-			}
-
-			return {
-				...prev,
-				courseId: selectedCourseId,
-				selectedCourse: nextSelectedCourse,
-				type: enrollmentType,
-			};
-		});
-	}, [
-		enrollmentType,
-		isDirty,
-		selectedCourseId,
-		selectedCourseSnapshot,
-		setFormAtom,
-	]);
-
 	const selectedCourse = useMemo(() => {
 		if (selectedCourseFromCurrentPage) return selectedCourseFromCurrentPage;
 		return formAtom.selectedCourse?.id === selectedCourseId
@@ -166,6 +117,97 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 	]);
 
 	const totalPrice = selectedCourse?.price || 0;
+
+	const handleSelectCourse = useCallback(
+		(courseId: string) => {
+			selectedCourseField.onChange(courseId);
+			const targetCourse = courses.find((c) => c.id === courseId);
+			setFormAtom((prev) => ({
+				...prev,
+				courseId,
+				selectedCourse: targetCourse
+					? createSelectedCourseSnapshot(targetCourse)
+					: null,
+			}));
+		},
+		[courses, selectedCourseField, setFormAtom],
+	);
+
+	const handleRemoveCourse = useCallback(() => {
+		selectedCourseField.onChange("");
+		setFormAtom((prev) => ({
+			...prev,
+			courseId: "",
+			selectedCourse: null,
+		}));
+	}, [selectedCourseField, setFormAtom]);
+
+	const mounted = useMounted();
+	const individualData = useAtomValue(individualRegistrationAtom);
+	const groupAtom = useAtomValue(groupRegistrationAtom);
+	const clearIncompatibleData = useSetAtom(
+		clearIncompatibleRegistrationDataAtom,
+	);
+
+	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [pendingType, setPendingType] = useState<"personal" | "group" | null>(
+		null,
+	);
+
+	const isHasIndividualData = useMemo(
+		() =>
+			!!individualData.name ||
+			!!individualData.email ||
+			!!individualData.phone ||
+			!!individualData.motivation,
+		[individualData],
+	);
+
+	const isHasGroupData = useMemo(
+		() =>
+			!!groupAtom.groupInfo.groupName ||
+			!!groupAtom.groupInfo.managerName ||
+			groupAtom.groupInfo.participantCount > 2 ||
+			!!groupAtom.representative.name,
+		[groupAtom],
+	);
+
+	const wouldLoseData = useCallback(
+		(targetType: "personal" | "group") =>
+			(targetType === "personal" && isHasGroupData) ||
+			(targetType === "group" && isHasIndividualData),
+		[isHasGroupData, isHasIndividualData],
+	);
+
+	const handleEnrollmentTypeChange = useCallback(
+		(type: "personal" | "group") => {
+			if (wouldLoseData(type)) {
+				setPendingType(type);
+				setIsDialogOpen(true);
+			} else {
+				enrollmentTypeField.onChange(type);
+				setFormAtom((prev) => ({
+					...prev,
+					type,
+				}));
+			}
+		},
+		[wouldLoseData, enrollmentTypeField, setFormAtom],
+	);
+
+	const handleConfirmReset = useCallback(() => {
+		if (!pendingType) return;
+		clearIncompatibleData(pendingType);
+
+		enrollmentTypeField.onChange(pendingType);
+		setFormAtom((prev) => ({
+			...prev,
+			type: pendingType,
+		}));
+
+		setIsDialogOpen(false);
+		setPendingType(null);
+	}, [pendingType, clearIncompatibleData, enrollmentTypeField, setFormAtom]);
 
 	const onSubmit: SubmitHandler<CourseSelectionForm> = (data) => {
 		if (!data.selectedCourseId) {
@@ -188,84 +230,130 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 		router.push(`?${params.toString()}`);
 	};
 
+	useEffect(() => {
+		if (
+			lastSyncedRef.current.courseId === formAtom.courseId &&
+			lastSyncedRef.current.type === formAtom.type
+		) {
+			return;
+		}
+		reset({
+			selectedCourseId: formAtom.courseId,
+			enrollmentType: formAtom.type,
+		});
+		lastSyncedRef.current = {
+			courseId: formAtom.courseId,
+			type: formAtom.type,
+		};
+	}, [formAtom.courseId, formAtom.type, reset]);
+
 	return (
-		<Box
-			as="form"
-			onSubmit={handleSubmit(onSubmit)}
-			padding={4}
-			display="flex"
-			flexDirection="column"
-			gap={6}
-		>
-			<Box>
-				<Text variant="headlineMd" marginBottom={4}>
-					강의 선택
-				</Text>
-				<CategoryTabs
-					currentCategory={currentCategory}
-					onCategoryChange={handleCategoryChange}
-				/>
-			</Box>
-
-			{isPending ? (
-				<Flex
-					justifyContent="center"
-					alignItems="center"
-					py={10}
-					role="status"
-					aria-busy="true"
+		<EnrollmentLayout>
+			<EnrollmentLayout.Main>
+				<Box
+					as="form"
+					onSubmit={handleSubmit(onSubmit)}
+					display="flex"
+					flexDirection="column"
+					gap={6}
 				>
-					<Text variant="bodyMd">강의 목록을 불러오는 중...</Text>
-				</Flex>
-			) : isError ? (
-				<Flex justifyContent="center" alignItems="center" py={10} role="alert">
-					<Text variant="bodyMd" color="error">
-						강의 목록을 불러오는데 실패했습니다.
-					</Text>
-				</Flex>
-			) : courses.length === 0 ? (
-				<Flex justifyContent="center" alignItems="center" py={10}>
-					<Text variant="bodyMd" color="onSurfaceVariant">
-						선택 가능한 강의가 없습니다.
-					</Text>
-				</Flex>
-			) : (
-				<Grid
-					gap={4}
-					style={{
-						gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-					}}
-				>
-					{courses.map((course: CourseType) => (
-						<CourseCard
-							key={course.id}
-							course={course}
-							isSelected={selectedCourseId === course.id}
-							onSelect={selectedCourseField.onChange}
+					<Box>
+						<Text variant="headlineMd" marginBottom={4}>
+							강의 선택
+						</Text>
+						<CategoryTabs
+							currentCategory={currentCategory}
+							onCategoryChange={handleCategoryChange}
 						/>
-					))}
-				</Grid>
-			)}
+					</Box>
 
-			{!isPending && !isError && (
-				<PaginationControl
-					currentPage={page}
-					totalPages={totalPages}
-					hasPrevPage={hasPrevPage}
-					hasNextPage={hasNextPage}
-					onPageChange={handlePageChange}
-				/>
-			)}
+					{isPending ? (
+						<Flex
+							justifyContent="center"
+							alignItems="center"
+							py={10}
+							role="status"
+							aria-busy="true"
+						>
+							<Text variant="bodyMd">강의 목록을 불러오는 중...</Text>
+						</Flex>
+					) : isError ? (
+						<Flex
+							justifyContent="center"
+							alignItems="center"
+							py={10}
+							role="alert"
+						>
+							<Text variant="bodyMd" color="error">
+								강의 목록을 불러오는데 실패했습니다.
+							</Text>
+						</Flex>
+					) : courses.length === 0 ? (
+						<Flex justifyContent="center" alignItems="center" py={10}>
+							<Text variant="bodySm" color="onSurfaceVariant">
+								선택 가능한 강의가 없습니다.
+							</Text>
+						</Flex>
+					) : (
+						<Grid
+							gap={4}
+							style={{
+								gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+							}}
+						>
+							{courses.map((course: CourseType) => (
+								<CourseCard
+									key={course.id}
+									course={course}
+									isSelected={selectedCourseId === course.id}
+									onSelect={handleSelectCourse}
+								/>
+							))}
+						</Grid>
+					)}
 
-			<SelectionSummary
-				selectedCourseId={selectedCourseId}
-				selectedCourse={selectedCourse}
-				totalPrice={totalPrice}
+					{!isPending && !isError && (
+						<PaginationControl
+							currentPage={page}
+							totalPages={totalPages}
+							hasPrevPage={hasPrevPage}
+							hasNextPage={hasNextPage}
+							onPageChange={handlePageChange}
+						/>
+					)}
+				</Box>
+			</EnrollmentLayout.Main>
+			<EnrollmentSidebar
+				currentStep={1}
+				totalSteps={3}
+				stepTitle="강의 선택"
+				percent={33}
+				selectedCourse={null}
 				enrollmentType={enrollmentType}
-				onEnrollmentTypeChange={enrollmentTypeField.onChange}
-				onRemoveCourse={() => selectedCourseField.onChange("")}
-				isNextDisabled={!selectedCourseId}
+			>
+				<PriceSummaryContent
+					totalPrice={totalPrice}
+					selectedCourseId={selectedCourseId}
+					mounted={mounted}
+				/>
+				<ParticipantTypeSelection
+					enrollmentType={enrollmentType}
+					selectedCourse={selectedCourse}
+					handleTypeChange={handleEnrollmentTypeChange}
+					onRemoveCourse={handleRemoveCourse}
+				/>
+				<EnrollmentLayout.Action
+					disabled={!selectedCourseId}
+					onClick={handleSubmit(onSubmit)}
+				>
+					다음 단계로 이동
+				</EnrollmentLayout.Action>
+			</EnrollmentSidebar>
+			<WarningAlertDialog
+				isDialogOpen={isDialogOpen}
+				setIsDialogOpen={setIsDialogOpen}
+				handleConfirmReset={handleConfirmReset}
 			/>
-		</Box>
+		</EnrollmentLayout>
 	);
 }

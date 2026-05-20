@@ -1,24 +1,28 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Box, Surface } from "@shared/design-system";
-import { useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
+import { Box, Button, Text } from "@shared/design-system";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useEffect, useState } from "react";
 import {
 	FormProvider,
 	type SubmitHandler,
 	useForm,
 	useWatch,
 } from "react-hook-form";
+import { FaInfoCircle } from "react-icons/fa";
+import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
+import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import { useBlocker } from "@/src/hooks/useBlocker";
 import {
+	enrollmentFormAtom,
 	groupRegistrationAtom,
 	groupRegistrationInitialData,
 	removeGroupRegistrationDataAtom,
 } from "../../enrollment/atoms";
-import { ParticipantManagement } from "../ParticipantManagement";
-import { RepresentativeInfo } from "../RepresentativeInfo";
-import { ParticipantSlotList } from "./ParticipantSlotList";
+import { ParticipantManagement } from "./components/ParticipantManagement";
+import { ParticipantSlotList } from "./components/ParticipantSlotList/ParticipantSlotList";
+import { RepresentativeInfo } from "./components/RepresentativeInfo";
 import {
 	type GroupApplicationData,
 	groupApplicationSchema,
@@ -38,7 +42,7 @@ export function GroupRegistrationStep({
 	onPrev,
 }: GroupRegistrationStepProps) {
 	const [liveAtomState, setLiveAtomState] = useAtom(groupRegistrationAtom);
-	const removeGroupData = useSetAtom(removeGroupRegistrationDataAtom); // still used by useBlocker
+	const removeGroupData = useSetAtom(removeGroupRegistrationDataAtom);
 
 	const methods = useForm<GroupApplicationData>({
 		resolver: zodResolver(groupApplicationSchema),
@@ -48,20 +52,23 @@ export function GroupRegistrationStep({
 
 	const { handleSubmit, reset } = methods;
 
-	const watchedValues = useWatch({
-		control: methods.control,
-		defaultValue: liveAtomState,
-	});
-	const shouldBlockNavigation = !isSameGroupApplicationData(
-		watchedValues,
-		groupRegistrationInitialData,
+	const [shouldBlockNavigation, setShouldBlockNavigation] = useState(
+		() =>
+			!isSameGroupApplicationData(liveAtomState, groupRegistrationInitialData),
 	);
 
-	// Sync form changes to atom in real-time so SelectionSummary can detect
-	// incompatible data when the user navigates back without submitting.
 	useEffect(() => {
-		setLiveAtomState(watchedValues as GroupApplicationData);
-	}, [watchedValues, setLiveAtomState]);
+		const subscription = methods.watch((value) => {
+			const isDirty = !isSameGroupApplicationData(
+				value as GroupApplicationData,
+				groupRegistrationInitialData,
+			);
+			if (isDirty !== shouldBlockNavigation) {
+				setShouldBlockNavigation(isDirty);
+			}
+		});
+		return () => subscription.unsubscribe();
+	}, [methods.watch, shouldBlockNavigation]);
 
 	useBlocker({
 		shouldBlock: shouldBlockNavigation,
@@ -78,52 +85,108 @@ export function GroupRegistrationStep({
 	};
 
 	const handlePrevClick = () => {
-		// Navigate back freely — group data stays in atoms so the user can
-		// return and continue. If they switch enrollment type on step 1,
-		// SelectionSummary will show an AlertDialog to confirm data reset.
 		onPrev();
 	};
 
+	const enrollmentForm = useAtomValue(enrollmentFormAtom);
+
+	const participantCount =
+		useWatch({
+			control: methods.control,
+			name: "groupInfo.participantCount",
+			defaultValue: liveAtomState.groupInfo.participantCount,
+		}) ?? 0;
+	const [hasMultiplePages, setHasMultiplePages] = useState(false);
+
+	useEffect(() => {
+		const handleResize = () => {
+			const width = window.innerWidth;
+			const itemsPerPage = width < 1024 ? 4 : 6;
+			setHasMultiplePages(participantCount > itemsPerPage);
+		};
+
+		handleResize();
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, [participantCount]);
+
 	return (
-		<FormProvider {...methods}>
-			<Box
-				as="form"
-				onSubmit={handleSubmit(onSubmit)}
-				display="flex"
-				flexDirection="column"
-				gap={4}
+		<EnrollmentLayout>
+			<EnrollmentLayout.Main>
+				<FormProvider {...methods}>
+					<Box
+						as="form"
+						onSubmit={handleSubmit(onSubmit)}
+						display="flex"
+						flexDirection="column"
+						gap={4}
+					>
+						<RepresentativeInfo />
+						<ParticipantManagement />
+
+						<ParticipantSlotList />
+					</Box>
+				</FormProvider>
+			</EnrollmentLayout.Main>
+			<EnrollmentSidebar
+				currentStep={2}
+				totalSteps={3}
+				stepTitle="수강생 정보 입력"
+				percent={66}
+				selectedCourse={enrollmentForm.selectedCourse}
+				enrollmentType={enrollmentForm.type}
 			>
-				<RepresentativeInfo />
-				<ParticipantManagement />
-
-				<ParticipantSlotList />
-
-				<Box marginTop={6} display="flex" gap={2} justifyContent="center">
-					<Surface
-						as="button"
-						type="button"
-						onClick={handlePrevClick}
-						padding={2}
-						borderRadius="md"
-						style={{ cursor: "pointer" }}
-						aria-label="이전 단계로 이동"
+				{hasMultiplePages && (
+					<Box
+						style={{
+							backgroundColor: "rgba(37, 99, 235, 0.08)",
+							border: "1px solid rgba(37, 99, 235, 0.2)",
+							borderRadius: "12px",
+							padding: "12px",
+							marginTop: "8px",
+							marginBottom: "16px",
+							display: "flex",
+							gap: "8px",
+							alignItems: "flex-start",
+						}}
 					>
-						이전 단계로 이동
-					</Surface>
-					<Surface
-						as="button"
-						type="submit"
-						data-testid="next-step-button"
-						padding={2}
-						borderRadius="md"
-						tone="primaryContainer"
-						style={{ cursor: "pointer" }}
-						aria-label="다음 단계로 이동"
-					>
-						다음 단계로 이동
-					</Surface>
-				</Box>
-			</Box>
-		</FormProvider>
+						<span
+							style={{
+								color: "#2563eb",
+								display: "inline-flex",
+								alignItems: "center",
+								marginTop: "2px",
+							}}
+						>
+							<FaInfoCircle size={16} />
+						</span>
+						<Text
+							color="primary"
+							style={{
+								fontSize: "12px",
+								lineHeight: "1.4",
+								fontWeight: 500,
+							}}
+						>
+							다음 페이지에도 입력 가능한 슬롯이 있습니다. 페이지네이션을 통해
+							확인해주세요.
+						</Text>
+					</Box>
+				)}
+				<Button
+					type="button"
+					variant="outline"
+					size="lg"
+					onClick={handlePrevClick}
+					style={{ width: "100%" }}
+					aria-label="이전 단계로 이동"
+				>
+					이전 단계로 이동
+				</Button>
+				<EnrollmentLayout.Action onClick={handleSubmit(onSubmit)}>
+					다음 단계로 이동
+				</EnrollmentLayout.Action>
+			</EnrollmentSidebar>
+		</EnrollmentLayout>
 	);
 }

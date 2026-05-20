@@ -1,6 +1,20 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("Funnel Routing & Global State", () => {
+	test.beforeEach(({ page }) => {
+		page.on("console", (msg) => {
+			console.log(`BROWSER CONSOLE: [${msg.type()}] ${msg.text()}`);
+		});
+		page.on("pageerror", (err) => {
+			console.error(`BROWSER ERROR: ${err.message}\n${err.stack}`);
+		});
+		page.on("response", (res) => {
+			if (res.status() >= 500) {
+				console.error(`BROWSER 500 RESPONSE: [${res.status()}] ${res.url()}`);
+			}
+		});
+	});
+
 	test("비정상 접근 리다이렉트: 필수 상태(courseId) 없이 Step 2로 직접 이동 시 Step 1로 리다이렉트된다", async ({
 		page,
 	}) => {
@@ -9,7 +23,9 @@ test.describe("Funnel Routing & Global State", () => {
 
 		// 1단계(강의 선택)로 리다이렉트되는지 확인
 		await expect(page).toHaveURL(/step=course-selection/);
-		await expect(page.getByText("강의 선택", { exact: false })).toBeVisible();
+		await expect(
+			page.getByText("강의 선택", { exact: false }).first(),
+		).toBeVisible();
 	});
 
 	test("세션 데이터 유지: Step 2에서 새로고침 시 입력한 데이터와 단계가 유지된다", async ({
@@ -32,6 +48,7 @@ test.describe("Funnel Routing & Global State", () => {
 
 		const nextButton = page.getByRole("button", { name: "다음 단계로 이동" });
 		await expect(nextButton).toBeEnabled();
+
 		await nextButton.click();
 
 		// 만약 이전 테스트 데이터 때문에 알림창이 뜬다면 확인 클릭

@@ -74,12 +74,14 @@ export const placeholder = recipe({
 		zIndex: 1,
 		background: vars.color.surfaceBright,
 		padding: `0 ${vars.space[1]}`,
+		opacity: 1,
 	},
 	variants: {
 		isFocused: {
 			true: {
 				transform: "translateY(-30px) scale(0.75)",
 				color: vars.color.primary,
+				opacity: 0,
 			},
 			false: {},
 		},

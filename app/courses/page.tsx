@@ -7,7 +7,6 @@ import { Suspense, useMemo } from "react";
 import { CourseSelectionStep } from "@/src/components/CourseSelectionStep";
 import { GroupRegistrationStep } from "@/src/components/GroupRegistrationStep";
 import { IndividualRegistration } from "@/src/components/IndividualRegistration";
-import { ProgressSection } from "@/src/components/ProgressSection/ProgressSection";
 import { SummaryDetailsStep } from "@/src/components/SummaryDetailsStep";
 import { INTERNAL_URL } from "@/src/constants";
 import {
@@ -53,9 +52,7 @@ function EnrollmentFunnel() {
 	const currentStep =
 		funnel.currentIndex >= 0 ? funnel.activeSteps[funnel.currentIndex] : null;
 	return (
-		<Box padding={4}>
-			<ProgressSection progress={funnel.progress} />
-
+		<>
 			{currentStep?.id === "course-selection" && (
 				<CourseSelectionStep onNext={funnel.next} />
 			)}
@@ -77,7 +74,7 @@ function EnrollmentFunnel() {
 					}}
 				/>
 			)}
-		</Box>
+		</>
 	);
 }
 

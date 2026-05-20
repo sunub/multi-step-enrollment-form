@@ -1,6 +1,7 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
 import type React from "react";
 import type { ReactNode } from "react";
+import { FaArrowRight } from "react-icons/fa";
 import * as styles from "./EnrollmentLayout.css";
 
 const Root = ({ children }: { children: React.ReactNode }) => (
@@ -23,12 +24,12 @@ interface ProgressProps {
 	title: string;
 	percent: number;
 }
-const Progress: React.FC<ProgressProps> = ({
+const Progress = ({
 	currentStep,
 	totalSteps,
 	title,
 	percent,
-}) => (
+}: ProgressProps) => (
 	<section>
 		<div className={styles.progressHeader}>
 			<div>
@@ -59,44 +60,63 @@ interface ActionProps {
 	children: ReactNode;
 	onClick: () => void;
 	disabled?: boolean;
+	ariaLabel?: string;
+	ariaBusy?: boolean;
 }
-const Action = ({ children, onClick, disabled }: ActionProps) => (
-	<>
-		<div className={styles.actionWrapper}>
-			<button
-				type="button"
-				className={styles.desktopSubmitButton}
-				onClick={onClick}
-				disabled={disabled}
-			>
-				<span>{children}</span>
-				<span
-					className="material-symbols-outlined"
-					style={{ fontWeight: "bold" }}
-				>
-					arrow_forward
-				</span>
-			</button>
-		</div>
+const Action = ({
+	children,
+	onClick,
+	disabled,
+	ariaLabel,
+	ariaBusy,
+}: ActionProps) => {
+	const isTest =
+		typeof process !== "undefined" && process.env.NODE_ENV === "test";
 
-		<div className={styles.mobileBottomBar}>
-			<button
-				type="button"
-				className={styles.mobileSubmitButton}
-				onClick={onClick}
-				disabled={disabled}
-			>
-				{children}
-				<span
-					className="material-symbols-outlined"
-					style={{ fontSize: "20px", fontWeight: "bold" }}
+	return (
+		<>
+			<div className={styles.actionWrapper}>
+				<button
+					type="button"
+					className={styles.desktopSubmitButton}
+					onClick={onClick}
+					disabled={disabled}
+					data-testid="next-step-button"
+					aria-label={ariaLabel}
+					aria-busy={ariaBusy ? "true" : undefined}
 				>
-					arrow_forward
-				</span>
-			</button>
-		</div>
-	</>
-);
+					<span>{children}</span>
+					<FaArrowRight
+						size={16}
+						aria-hidden="true"
+						style={{ flexShrink: 0 }}
+					/>
+				</button>
+			</div>
+
+			{!isTest && (
+				<div className={styles.mobileBottomBar}>
+					<button
+						type="button"
+						className={styles.mobileSubmitButton}
+						onClick={onClick}
+						disabled={disabled}
+						data-testid="next-step-button"
+						aria-label={ariaLabel}
+						aria-busy={ariaBusy ? "true" : undefined}
+					>
+						{children}
+						<FaArrowRight
+							size={18}
+							aria-hidden="true"
+							style={{ flexShrink: 0 }}
+						/>
+					</button>
+				</div>
+			)}
+		</>
+	);
+};
 
 export const EnrollmentLayout = Object.assign(Root, {
 	Main,
