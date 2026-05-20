@@ -1,18 +1,12 @@
 import { Box, Flex, Surface, Text, vars } from "@shared/design-system";
-import type { CourseCategoryType, CourseType } from "@shared/types";
+import type { CourseType } from "@shared/types";
+import { categoryColorMap } from "@/src/constants";
 
 interface CourseCardProps {
 	course: CourseType;
 	isSelected: boolean;
 	onSelect: (id: string) => void;
 }
-
-const categoryColorMap: Record<CourseCategoryType, keyof typeof vars.color> = {
-	development: "primary",
-	design: "secondary",
-	marketing: "tertiary",
-	business: "surfaceTint",
-};
 
 export const CourseCard = ({
 	course,

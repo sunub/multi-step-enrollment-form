@@ -7,6 +7,8 @@ import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { type SubmitHandler, useController, useForm } from "react-hook-form";
+import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
+import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import {
 	clearIncompatibleRegistrationDataAtom,
 	createSelectedCourseSnapshot,
@@ -16,12 +18,7 @@ import {
 } from "@/src/enrollment";
 import { getPaginatedCoursesQueryOptions } from "@/src/queries/courses/coursesQueryKey";
 import { useMounted } from "../../hooks/useMounted";
-import {
-	CategoryTabs,
-	CourseCard,
-	PaginationControl,
-	SelectionSummary,
-} from "./components";
+import { CategoryTabs, CourseCard, PaginationControl } from "./components";
 import { ParticipantTypeSelection } from "./components/ParticipanTypeSelection";
 import { PriceSummaryContent } from "./components/PriceSummaryContent";
 import { WarningAlertDialog } from "./components/WarningAlertDialog";
@@ -251,75 +248,89 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 	}, [formAtom.courseId, formAtom.type, reset]);
 
 	return (
-		<Box
-			as="form"
-			onSubmit={handleSubmit(onSubmit)}
-			padding={4}
-			display="flex"
-			flexDirection="column"
-			gap={6}
-		>
-			<Box>
-				<Text variant="headlineMd" marginBottom={4}>
-					강의 선택
-				</Text>
-				<CategoryTabs
-					currentCategory={currentCategory}
-					onCategoryChange={handleCategoryChange}
-				/>
-			</Box>
-
-			{isPending ? (
-				<Flex
-					justifyContent="center"
-					alignItems="center"
-					py={10}
-					role="status"
-					aria-busy="true"
+		<EnrollmentLayout>
+			<EnrollmentLayout.Main>
+				<Box
+					as="form"
+					onSubmit={handleSubmit(onSubmit)}
+					display="flex"
+					flexDirection="column"
+					gap={6}
 				>
-					<Text variant="bodyMd">강의 목록을 불러오는 중...</Text>
-				</Flex>
-			) : isError ? (
-				<Flex justifyContent="center" alignItems="center" py={10} role="alert">
-					<Text variant="bodyMd" color="error">
-						강의 목록을 불러오는데 실패했습니다.
-					</Text>
-				</Flex>
-			) : courses.length === 0 ? (
-				<Flex justifyContent="center" alignItems="center" py={10}>
-					<Text variant="bodyMd" color="onSurfaceVariant">
-						선택 가능한 강의가 없습니다.
-					</Text>
-				</Flex>
-			) : (
-				<Grid
-					gap={4}
-					style={{
-						gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-					}}
-				>
-					{courses.map((course: CourseType) => (
-						<CourseCard
-							key={course.id}
-							course={course}
-							isSelected={selectedCourseId === course.id}
-							onSelect={handleSelectCourse}
+					<Box>
+						<Text variant="headlineMd" marginBottom={4}>
+							강의 선택
+						</Text>
+						<CategoryTabs
+							currentCategory={currentCategory}
+							onCategoryChange={handleCategoryChange}
 						/>
-					))}
-				</Grid>
-			)}
+					</Box>
 
-			{!isPending && !isError && (
-				<PaginationControl
-					currentPage={page}
-					totalPages={totalPages}
-					hasPrevPage={hasPrevPage}
-					hasNextPage={hasNextPage}
-					onPageChange={handlePageChange}
-				/>
-			)}
+					{isPending ? (
+						<Flex
+							justifyContent="center"
+							alignItems="center"
+							py={10}
+							role="status"
+							aria-busy="true"
+						>
+							<Text variant="bodyMd">강의 목록을 불러오는 중...</Text>
+						</Flex>
+					) : isError ? (
+						<Flex
+							justifyContent="center"
+							alignItems="center"
+							py={10}
+							role="alert"
+						>
+							<Text variant="bodyMd" color="error">
+								강의 목록을 불러오는데 실패했습니다.
+							</Text>
+						</Flex>
+					) : courses.length === 0 ? (
+						<Flex justifyContent="center" alignItems="center" py={10}>
+							<Text variant="bodySm" color="onSurfaceVariant">
+								선택 가능한 강의가 없습니다.
+							</Text>
+						</Flex>
+					) : (
+						<Grid
+							gap={4}
+							style={{
+								gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+							}}
+						>
+							{courses.map((course: CourseType) => (
+								<CourseCard
+									key={course.id}
+									course={course}
+									isSelected={selectedCourseId === course.id}
+									onSelect={handleSelectCourse}
+								/>
+							))}
+						</Grid>
+					)}
 
-			<SelectionSummary isNextDisabled={!selectedCourseId}>
+					{!isPending && !isError && (
+						<PaginationControl
+							currentPage={page}
+							totalPages={totalPages}
+							hasPrevPage={hasPrevPage}
+							hasNextPage={hasNextPage}
+							onPageChange={handlePageChange}
+						/>
+					)}
+				</Box>
+			</EnrollmentLayout.Main>
+			<EnrollmentSidebar
+				currentStep={1}
+				totalSteps={3}
+				stepTitle="강의 선택"
+				percent={33}
+				selectedCourse={null}
+				enrollmentType={enrollmentType}
+			>
 				<PriceSummaryContent
 					totalPrice={totalPrice}
 					selectedCourseId={selectedCourseId}
@@ -331,12 +342,18 @@ export function CourseSelectionStep({ onNext }: CourseSelectionStepProps) {
 					handleTypeChange={handleEnrollmentTypeChange}
 					onRemoveCourse={handleRemoveCourse}
 				/>
-			</SelectionSummary>
+				<EnrollmentLayout.Action
+					disabled={!selectedCourseId}
+					onClick={handleSubmit(onSubmit)}
+				>
+					다음 단계로 이동
+				</EnrollmentLayout.Action>
+			</EnrollmentSidebar>
 			<WarningAlertDialog
 				isDialogOpen={isDialogOpen}
 				setIsDialogOpen={setIsDialogOpen}
 				handleConfirmReset={handleConfirmReset}
 			/>
-		</Box>
+		</EnrollmentLayout>
 	);
 }

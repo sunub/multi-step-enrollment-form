@@ -49,6 +49,13 @@ export const categoryIconMap = {
 	business: IoIosBusiness,
 } as const;
 
+export const categoryColorMap = {
+	development: "primary",
+	design: "secondary",
+	marketing: "tertiary",
+	business: "warning",
+} as const;
+
 export const ICON_MAP = {
 	menu_book: MdMenuBook,
 	person: MdPerson,

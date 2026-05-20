@@ -26,7 +26,7 @@ export const courseWrapper = style({
 });
 
 export const removeButton = style({
-	padding: 0,
+	padding: `${vars.space[0.5]} ${vars.space[1]}`,
 	minWidth: "auto",
 	height: "auto",
 });

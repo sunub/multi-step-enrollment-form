@@ -1,4 +1,6 @@
 import { Box, Button, Flex, Surface, Text } from "@shared/design-system";
+import { GrAnnounce } from "react-icons/gr";
+import { MdDeleteOutline } from "react-icons/md";
 import type { SelectedCourseSnapshot } from "@/src/enrollment";
 import type { EnrollmentType } from "../CourseSelectionStep";
 import * as styles from "./ParticipanTypeSelection.css";
@@ -58,7 +60,8 @@ export function ParticipantTypeSelection({
 					data-testid="group-enrollment-notice"
 				>
 					<Text variant="bodySm" color="onErrorContainer">
-						📢 단체 신청 안내: 단체명, 최소 2인 이상, 담당자 정보가 필요합니다.
+						<GrAnnounce size={16} style={{ verticalAlign: "middle" }} /> 단체
+						신청 안내: 단체명, 최소 2인 이상, 담당자 정보가 필요합니다.
 					</Text>
 				</Surface>
 			)}
@@ -79,12 +82,12 @@ export function ParticipantTypeSelection({
 								<Button
 									type="button"
 									variant="ghost"
-									size="sm"
+									size="md"
 									onClick={onRemoveCourse}
 									data-testid="summary-remove-button"
 									className={styles.removeButton}
 								>
-									✕
+									<MdDeleteOutline size={20} />
 								</Button>
 							</Flex>
 							<Text variant="labelSm" color="onSurfaceVariant">
