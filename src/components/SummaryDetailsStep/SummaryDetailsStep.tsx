@@ -4,7 +4,7 @@ import { Box, Button } from "@shared/design-system";
 import { useMutation } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useMemo, useRef, useState } from "react";
-import { steps } from "@/app/courses/funeelConfig";
+import { steps } from "@/app/courses/funnelConfig";
 import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
 import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import {
