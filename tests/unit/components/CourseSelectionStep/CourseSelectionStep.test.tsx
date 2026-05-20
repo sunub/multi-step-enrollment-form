@@ -3,11 +3,11 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { createStore, getDefaultStore, Provider } from "jotai";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { CourseSelectionStep } from "@/src/components/CourseSelectionStep/CourseSelectionStep";
 import {
 	type EnrollmentFormData,
 	enrollmentFormAtom,
-} from "../../enrollment/atoms";
-import { CourseSelectionStep } from "./CourseSelectionStep";
+} from "@/src/enrollment/atoms";
 
 const mockPush = vi.fn();
 const mockOnNext = vi.fn();
@@ -28,7 +28,7 @@ vi.mock("@tanstack/react-query", async (importOriginal) => {
 	};
 });
 
-vi.mock("../../../constants", () => ({
+vi.mock("@/src/constants", () => ({
 	COURSE_CATEGORIES: ["development", "design", "marketing", "business"],
 	CATEGORY_COURSE_URLS: {
 		DEVELOPMENT: "/courses/development",
@@ -38,7 +38,7 @@ vi.mock("../../../constants", () => ({
 	},
 }));
 
-vi.mock("../../../queries/courses/coursesQueryKey", () => ({
+vi.mock("@/src/queries/courses/coursesQueryKey", () => ({
 	getPaginatedCoursesQueryOptions: () => ({}),
 }));
 

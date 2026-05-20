@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { IndividualRegistration } from "@/src/components/IndividualRegistration/IndividualRegistration";
+import type { IndividualApplicationData } from "@/src/components/IndividualRegistration/types";
 import {
 	individualRegistrationAtom,
 	individualRegistrationInitialData,
-} from "../../enrollment/atoms";
-import { IndividualRegistration } from "./IndividualRegistration";
-import type { IndividualApplicationData } from "./types";
+} from "@/src/enrollment/atoms";
 
 vi.mock("next/navigation", () => ({
 	usePathname: () => "/courses",

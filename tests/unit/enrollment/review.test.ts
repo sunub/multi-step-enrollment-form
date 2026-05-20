@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { GroupApplicationData } from "../components/GroupRegistrationStep/types";
-import type { IndividualApplicationData } from "../components/IndividualRegistration/types";
-import type { EnrollmentFormData } from "./atoms";
+import type { GroupApplicationData } from "@/src/components/GroupRegistrationStep/types";
+import type { IndividualApplicationData } from "@/src/components/IndividualRegistration/types";
+import type { EnrollmentFormData } from "@/src/enrollment/atoms";
 import {
 	createEnrollmentRequestPayload,
 	createEnrollmentReviewModel,
-} from "./review";
+} from "@/src/enrollment/review";
 
 const baseEnrollmentFormData: EnrollmentFormData = {
 	courseId: "course-1",

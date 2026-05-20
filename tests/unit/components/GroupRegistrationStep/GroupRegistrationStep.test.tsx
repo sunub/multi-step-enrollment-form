@@ -1,12 +1,12 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { createStore, Provider } from "jotai";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { GroupRegistrationStep } from "@/src/components/GroupRegistrationStep/GroupRegistrationStep";
+import type { GroupApplicationData } from "@/src/components/GroupRegistrationStep/types";
 import {
 	groupRegistrationAtom,
 	groupRegistrationInitialData,
-} from "../../enrollment/atoms";
-import { GroupRegistrationStep } from "./GroupRegistrationStep";
-import type { GroupApplicationData } from "./types";
+} from "@/src/enrollment/atoms";
 
 const representativeNameLabel = /대표자 성함을 입력해주세요/;
 
