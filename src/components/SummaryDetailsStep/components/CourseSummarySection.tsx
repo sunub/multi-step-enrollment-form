@@ -77,9 +77,9 @@ export const CourseSummarySection = React.memo(
 				<Button
 					type="button"
 					variant="outline"
-					size="sm"
+					size="md"
 					onClick={onEditClick}
-					style={{ cursor: "pointer" }}
+					style={{ cursor: "pointer", marginTop: "16px" }}
 				>
 					강의 선택 수정
 				</Button>

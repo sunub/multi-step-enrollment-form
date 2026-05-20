@@ -5,6 +5,8 @@ import { useMutation } from "@tanstack/react-query";
 import { useAtomValue } from "jotai";
 import { useMemo, useRef, useState } from "react";
 import { steps } from "@/app/courses/funeelConfig";
+import { EnrollmentLayout } from "@/src/components/EnrollmentLayout";
+import { EnrollmentSidebar } from "@/src/components/EnrollmentSidebar";
 import {
 	createEnrollmentRequestPayload,
 	createEnrollmentReviewModel,
@@ -18,7 +20,6 @@ import {
 import { ApplicantSummarySection } from "./components/ApplicantSummarySection";
 import { CourseSummarySection } from "./components/CourseSummarySection";
 import { SubmitAgreementSection } from "./components/SubmitAgreementSection";
-import * as styles from "./SummaryDetailsStep.css";
 
 interface SummaryDetailsStepProps {
 	navigateTo: (stepId: string) => void;
@@ -117,52 +118,65 @@ export function SummaryDetailsStep({
 	const submitDisabled =
 		!agreedToTerms || !reviewModel.isReadyToSubmit || mutation.isPending;
 
-	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
+	function handleSubmit(e?: React.FormEvent<HTMLFormElement>) {
+		if (e) e.preventDefault();
 		if (isSubmitRef.current) return;
 		isSubmitRef.current = true;
 		mutation.mutate();
 	}
 
 	return (
-		<Box
-			as="form"
-			onSubmit={handleSubmit}
-			display="flex"
-			flexDirection="column"
-			gap={3}
-		>
-			<CourseSummarySection
-				course={reviewModel.course}
-				onEditClick={() => navigateTo("course-selection")}
-			/>
+		<form onSubmit={handleSubmit} style={{ width: "100%" }}>
+			<EnrollmentLayout>
+				<EnrollmentLayout.Main>
+					<Box display="flex" flexDirection="column" gap={3}>
+						<CourseSummarySection
+							course={reviewModel.course}
+							onEditClick={() => navigateTo("course-selection")}
+						/>
 
-			<ApplicantSummarySection
-				applicant={reviewModel.applicant}
-				onEditClick={() =>
-					navigateTo(registrationFunnelId ?? "course-selection")
-				}
-			/>
-
-			<SubmitAgreementSection
-				agreedToTerms={agreedToTerms}
-				onAgreementChange={setAgreedToTerms}
-				isPending={mutation.isPending}
-				error={errorPresentation}
-			/>
-
-			<Box className={styles.actionRow}>
-				<Button
-					type="submit"
-					size="lg"
-					disabled={submitDisabled}
-					className={styles.actionButton}
-					aria-label="수강 신청 제출"
-					aria-busy={mutation.isPending}
+						<ApplicantSummarySection
+							applicant={reviewModel.applicant}
+							onEditClick={() =>
+								navigateTo(registrationFunnelId ?? "course-selection")
+							}
+						/>
+					</Box>
+				</EnrollmentLayout.Main>
+				<EnrollmentSidebar
+					currentStep={3}
+					totalSteps={3}
+					stepTitle="수강 신청 확인 및 제출"
+					percent={100}
+					selectedCourse={enrollmentForm.selectedCourse}
+					enrollmentType={enrollmentForm.type}
 				>
-					{mutation.isPending ? "제출 중..." : "수강 신청 제출"}
-				</Button>
-			</Box>
-		</Box>
+					<SubmitAgreementSection
+						agreedToTerms={agreedToTerms}
+						onAgreementChange={setAgreedToTerms}
+						isPending={mutation.isPending}
+						error={errorPresentation}
+					/>
+					<Button
+						type="button"
+						variant="outline"
+						size="lg"
+						onClick={_onPrev}
+						style={{ width: "100%" }}
+						aria-label="이전 단계로 이동"
+					>
+						이전 단계로 이동
+					</Button>
+					<EnrollmentLayout.Action
+						disabled={submitDisabled}
+						onClick={() => handleSubmit()}
+						ariaLabel="수강 신청 제출"
+						ariaBusy={mutation.isPending}
+					>
+						{mutation.isPending ? "제출 중..." : "수강 신청 제출"}
+					</EnrollmentLayout.Action>
+				</EnrollmentSidebar>
+			</EnrollmentLayout>
+		</form>
 	);
 }

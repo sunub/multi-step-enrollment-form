@@ -116,9 +116,9 @@ export const ApplicantSummarySection = React.memo(
 				<Button
 					type="button"
 					variant="outline"
-					size="sm"
+					size="md"
 					onClick={onEditClick}
-					style={{ cursor: "pointer" }}
+					style={{ cursor: "pointer", marginTop: "16px" }}
 				>
 					신청 정보 수정
 				</Button>
