@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Surface } from "@shared/design-system";
 import { useAtom, useSetAtom } from "jotai";
-import type React from "react";
 import { useEffect, useRef } from "react";
 import { FormProvider, useForm, useWatch } from "react-hook-form";
 import {
@@ -29,10 +28,10 @@ interface IndividualRegistrationProps {
 
 const LEAVE_PAGE_MESSAGE = "작성 중인 내용이 있습니다. 정말 나가시겠습니까?";
 
-export const IndividualRegistration: React.FC<IndividualRegistrationProps> = ({
+export const IndividualRegistration = ({
 	onNext,
 	onPrev,
-}) => {
+}: IndividualRegistrationProps) => {
 	const [liveAtomState, setLiveAtomState] = useAtom(individualRegistrationAtom);
 	const methods = useForm<IndividualApplicationData>({
 		resolver: zodResolver(individualApplicationSchema),

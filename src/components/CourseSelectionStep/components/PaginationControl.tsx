@@ -1,5 +1,4 @@
 import { Button, Flex, Text } from "@shared/design-system";
-import type React from "react";
 
 interface PaginationControlProps {
 	currentPage: number;
@@ -9,13 +8,13 @@ interface PaginationControlProps {
 	onPageChange: (page: number) => void;
 }
 
-export const PaginationControl: React.FC<PaginationControlProps> = ({
+export const PaginationControl = ({
 	currentPage,
 	totalPages,
 	hasPrevPage,
 	hasNextPage,
 	onPageChange,
-}) => {
+}: PaginationControlProps) => {
 	return (
 		<Flex justifyContent="center" alignItems="center" gap={4} py={4}>
 			<Button

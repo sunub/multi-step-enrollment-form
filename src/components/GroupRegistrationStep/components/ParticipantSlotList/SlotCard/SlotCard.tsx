@@ -1,6 +1,5 @@
 import { Box, Flex, Text, vars } from "@shared/design-system";
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import type React from "react";
 import { useController, useFormContext } from "react-hook-form";
 import { FaCheckCircle, FaTimes } from "react-icons/fa";
 import { TextField } from "@/src/components/TextField";
@@ -15,7 +14,7 @@ export interface SlotCardProps {
 	onClear: () => void;
 }
 
-export const SlotCard: React.FC<SlotCardProps> = ({ index, onClear }) => {
+export const SlotCard = ({ index, onClear }: SlotCardProps) => {
 	const {
 		control,
 		formState: { errors },

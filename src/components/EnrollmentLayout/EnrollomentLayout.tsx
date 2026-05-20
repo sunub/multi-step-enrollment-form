@@ -23,12 +23,12 @@ interface ProgressProps {
 	title: string;
 	percent: number;
 }
-const Progress: React.FC<ProgressProps> = ({
+const Progress = ({
 	currentStep,
 	totalSteps,
 	title,
 	percent,
-}) => (
+}: ProgressProps) => (
 	<section>
 		<div className={styles.progressHeader}>
 			<div>

@@ -1,9 +1,7 @@
 import { assignInlineVars } from "@vanilla-extract/dynamic";
-import type React from "react";
 import { useState } from "react";
 import * as styles from "./EnrollmentSidebar.css";
 
-// 1. Progress 영역 컴포넌트
 const ProgressSection = () => {
 	const percent = 66;
 
@@ -38,7 +36,6 @@ const ProgressSection = () => {
 	);
 };
 
-// 2. 신청 유형 영역 컴포넌트
 const EnrollmentTypeSelector = () => {
 	const [selectedType, setSelectedType] = useState<"individual" | "group">(
 		"group",
@@ -54,7 +51,6 @@ const EnrollmentTypeSelector = () => {
 			</h2>
 
 			<div className={styles.radioGroup}>
-				{/* 개인 */}
 				<label
 					className={
 						selectedType === "individual"
@@ -89,7 +85,6 @@ const EnrollmentTypeSelector = () => {
 					</div>
 				</label>
 
-				{/* 단체 */}
 				<label
 					className={
 						selectedType === "group"
@@ -128,7 +123,6 @@ const EnrollmentTypeSelector = () => {
 	);
 };
 
-// 3. 선택된 강의 리스트 영역 컴포넌트
 const SelectedCourseList = () => {
 	return (
 		<>
@@ -142,7 +136,6 @@ const SelectedCourseList = () => {
 			</div>
 
 			<div className={styles.selectedListContainer}>
-				{/* Sample Item */}
 				<div className={styles.courseCard}>
 					<div className={styles.courseCardInner}>
 						<div className={styles.courseIconWrapper}>
@@ -164,7 +157,6 @@ const SelectedCourseList = () => {
 	);
 };
 
-// 4. 결제 요약 및 CTA 영역 컴포넌트
 const OrderSummary = () => {
 	return (
 		<div className={styles.summaryContainer}>
@@ -189,8 +181,7 @@ const OrderSummary = () => {
 	);
 };
 
-// --- 메인 통합 컴포넌트 ---
-export const EnrollmentSidebar: React.FC = () => {
+export const EnrollmentSidebar = () => {
 	return (
 		<aside className={styles.sidebarWrapper}>
 			<div className={styles.glassPanel}>

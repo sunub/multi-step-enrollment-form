@@ -1,9 +1,8 @@
 import { Box, Flex, Text } from "@shared/design-system";
-import type React from "react";
 import { MdGroups } from "react-icons/md";
 import * as styles from "../ParticipantManagement.css";
 
-export const ParticipantManagementHeader: React.FC = () => {
+export const ParticipantManagementHeader = () => {
 	return (
 		<Flex alignItems="center" gap={1}>
 			<Box className={styles.headerIcon}>

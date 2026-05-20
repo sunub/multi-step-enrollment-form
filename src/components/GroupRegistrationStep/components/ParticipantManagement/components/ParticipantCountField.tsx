@@ -1,6 +1,5 @@
 import { Box, Flex, Text } from "@shared/design-system";
 import clsx from "clsx";
-import type React from "react";
 import * as styles from "../ParticipantManagement.css";
 
 interface ParticipantCountFieldProps {
@@ -16,7 +15,7 @@ interface ParticipantCountFieldProps {
 	max: number;
 }
 
-export const ParticipantCountField: React.FC<ParticipantCountFieldProps> = ({
+export const ParticipantCountField = ({
 	mounted,
 	registeredCount,
 	createdSlotsCount,
@@ -27,7 +26,7 @@ export const ParticipantCountField: React.FC<ParticipantCountFieldProps> = ({
 	error,
 	min,
 	max,
-}) => {
+}: ParticipantCountFieldProps) => {
 	return (
 		<Flex
 			alignItems="center"

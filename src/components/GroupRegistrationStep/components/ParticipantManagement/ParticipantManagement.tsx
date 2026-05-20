@@ -2,7 +2,6 @@
 
 import { Box, Flex } from "@shared/design-system";
 import { useSetAtom } from "jotai";
-import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useController, useFormContext, useWatch } from "react-hook-form";
 import { groupRegistrationAtom } from "@/src/enrollment";
@@ -21,7 +20,7 @@ const PARTICIPANT_COUNT_DEBOUNCE_MS = 500;
 const MIN_PARTICIPANTS = 2;
 const MAX_PARTICIPANTS = 10;
 
-export const ParticipantManagement: React.FC = () => {
+export const ParticipantManagement = () => {
 	const mounted = useMounted();
 	const {
 		control,

@@ -9,11 +9,11 @@ interface SelectionSummaryProps {
 	children: React.ReactNode;
 }
 
-export const SelectionSummary: React.FC<SelectionSummaryProps> = ({
+export const SelectionSummary = ({
 	isNextDisabled,
 	onSubmitClick,
 	children,
-}) => {
+}: SelectionSummaryProps) => {
 	const hiddenSubmitRef = useRef<HTMLButtonElement>(null);
 
 	const handleNextClick = () => {
