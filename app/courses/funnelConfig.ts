@@ -6,65 +6,65 @@ import type { EnrollmentFormData } from "@/src/enrollment";
 import type { StepConfig } from "@/src/funnel";
 
 export interface CoursesFunnelState {
-	enrollmentForm: EnrollmentFormData;
-	individualRegistration: IndividualApplicationData;
-	groupRegistration: GroupApplicationData;
+  enrollmentForm: EnrollmentFormData;
+  individualRegistration: IndividualApplicationData;
+  groupRegistration: GroupApplicationData;
 }
 
 export function hasSelectedCourse(enrollmentForm: EnrollmentFormData) {
-	return Boolean(
-		enrollmentForm.courseId &&
-			enrollmentForm.selectedCourse &&
-			enrollmentForm.courseId === enrollmentForm.selectedCourse.id,
-	);
+  return Boolean(
+    enrollmentForm.courseId &&
+    enrollmentForm.selectedCourse &&
+    enrollmentForm.courseId === enrollmentForm.selectedCourse.id,
+  );
 }
 
 export function canAccessIndividualMemberRegistration(
-	state: CoursesFunnelState,
+  state: CoursesFunnelState,
 ) {
-	return (
-		hasSelectedCourse(state.enrollmentForm) &&
-		state.enrollmentForm.type === "personal"
-	);
+  return (
+    hasSelectedCourse(state.enrollmentForm) &&
+    state.enrollmentForm.type === "personal"
+  );
 }
 
 export function canAccessGroupMemberRegistration(state: CoursesFunnelState) {
-	return (
-		hasSelectedCourse(state.enrollmentForm) &&
-		state.enrollmentForm.type === "group"
-	);
+  return (
+    hasSelectedCourse(state.enrollmentForm) &&
+    state.enrollmentForm.type === "group"
+  );
 }
 
 export function canAccessReview(state: CoursesFunnelState) {
-	if (!hasSelectedCourse(state.enrollmentForm)) {
-		return false;
-	}
+  if (!hasSelectedCourse(state.enrollmentForm)) {
+    return false;
+  }
 
-	if (state.enrollmentForm.type === "group") {
-		return groupApplicationSchema.safeParse(state.groupRegistration).success;
-	}
+  if (state.enrollmentForm.type === "group") {
+    return groupApplicationSchema.safeParse(state.groupRegistration).success;
+  }
 
-	return individualApplicationSchema.safeParse(state.individualRegistration)
-		.success;
+  return individualApplicationSchema.safeParse(state.individualRegistration)
+    .success;
 }
 
 export const steps: StepConfig<CoursesFunnelState>[] = [
-	{
-		id: "course-selection",
-		shouldRender: () => true,
-	},
-	{
-		id: "individual-member-registration",
-		name: "personal",
-		shouldRender: canAccessIndividualMemberRegistration,
-	},
-	{
-		id: "group-member-registration",
-		name: "group",
-		shouldRender: canAccessGroupMemberRegistration,
-	},
-	{
-		id: "review",
-		shouldRender: canAccessReview,
-	},
+  {
+    id: "course-selection",
+    shouldRender: () => true,
+  },
+  {
+    id: "individual-member-registration",
+    name: "personal",
+    shouldRender: canAccessIndividualMemberRegistration,
+  },
+  {
+    id: "group-member-registration",
+    name: "group",
+    shouldRender: canAccessGroupMemberRegistration,
+  },
+  {
+    id: "review",
+    shouldRender: canAccessReview,
+  },
 ];
