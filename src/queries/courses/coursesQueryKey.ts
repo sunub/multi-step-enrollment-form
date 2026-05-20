@@ -10,6 +10,7 @@ export const getPaginatedCoursesQueryOptions = (
 	const parsedCategory = CourseTypeSchema.parse(category);
 	return queryOptions({
 		queryKey: ["courses", parsedCategory, "paginated", page],
-		queryFn: () => fetchPaginatedCourses(parsedCategory, page),
+		queryFn: ({ signal }) =>
+			fetchPaginatedCourses(parsedCategory, page, 10, signal),
 	});
 };
