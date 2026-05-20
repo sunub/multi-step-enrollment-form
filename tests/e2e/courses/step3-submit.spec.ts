@@ -55,10 +55,12 @@ test.describe("Step 3: 확인 및 제출 페이지", () => {
 		await page.getByRole("checkbox").check();
 
 		const submitButton = page.getByRole("button", { name: "수강 신청 제출" });
-
-		// 연타 시도 (첫 클릭 이후 강제 클릭으로 중복 제출 방지 로직 검증)
+		// 1차 클릭
 		await submitButton.click();
+		// 2차 강제 클릭 시도 전 스크롤 강제 동기화
+		await submitButton.scrollIntoViewIfNeeded();
 		await submitButton.click({ force: true });
+		await submitButton.scrollIntoViewIfNeeded();
 		await submitButton.click({ force: true });
 
 		// 제출 중 상태 확인 (Phase 1 리팩토링 결과)
