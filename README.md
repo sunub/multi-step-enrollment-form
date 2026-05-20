@@ -1,5 +1,7 @@
 ## 프로젝트 개요
 
+> 주요 작업 내용에 대한 커밋들은 PR에 포함되어 있습니다 : [PR1](https://github.com/sunub/multi-step-enrollment-form/pull/2),   [PR2](https://github.com/sunub/multi-step-enrollment-form/pull/3),   [PR3](https://github.com/sunub/multi-step-enrollment-form/pull/4),   [PR4](https://github.com/sunub/multi-step-enrollment-form/pull/5),  [PR5](https://github.com/sunub/multi-step-enrollment-form/pull/6)
+
 과제 수행 과정에서 향후 폼의 단계가 추가되거나 조건이 변경되더라도 유연하게 대응할 수 있는 확장성과 데이터 정합성을 보장하는 구조를 설계하는 데 목적을 두었습니다.
 
 과제에서 요구한 필수 기능을 구현함에 있어서 복잡한 다단계 폼에서 가장 빈번하게 발생하는 상태 간섭과 예기치 않은 사용자 이탈로 인한 데이터 유실 문제를 해결하는 데 초점을 맞추었습니다. 나아가 실제 서비스 환경을 가정하여 서버 장애 시의 복구 흐름이나 대용량 데이터 렌더링과 같은 엣지 케이스까지 선제적으로 방어하고자 노력했습니다.
