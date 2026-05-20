@@ -46,6 +46,7 @@ export const glassPanel = style({
 	"@media": {
 		"screen and (min-width: 1024px)": {
 			maxHeight: "calc(100vh - 8rem)",
+			overflowY: "auto",
 		},
 	},
 });
