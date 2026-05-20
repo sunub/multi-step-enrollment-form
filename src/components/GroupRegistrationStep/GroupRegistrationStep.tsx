@@ -3,7 +3,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Surface } from "@shared/design-system";
 import { useAtom, useSetAtom } from "jotai";
-import { useEffect } from "react";
 import {
 	FormProvider,
 	type SubmitHandler,
@@ -16,9 +15,9 @@ import {
 	groupRegistrationInitialData,
 	removeGroupRegistrationDataAtom,
 } from "../../enrollment/atoms";
-import { ParticipantManagement } from "../ParticipantManagement";
-import { RepresentativeInfo } from "../RepresentativeInfo";
-import { ParticipantSlotList } from "./ParticipantSlotList";
+import { ParticipantManagement } from "./components/ParticipantManagement";
+import { ParticipantSlotList } from "./components/ParticipantSlotList/ParticipantSlotList";
+import { RepresentativeInfo } from "./components/RepresentativeInfo";
 import {
 	type GroupApplicationData,
 	groupApplicationSchema,
@@ -57,12 +56,6 @@ export function GroupRegistrationStep({
 		groupRegistrationInitialData,
 	);
 
-	// Sync form changes to atom in real-time so SelectionSummary can detect
-	// incompatible data when the user navigates back without submitting.
-	useEffect(() => {
-		setLiveAtomState(watchedValues as GroupApplicationData);
-	}, [watchedValues, setLiveAtomState]);
-
 	useBlocker({
 		shouldBlock: shouldBlockNavigation,
 		message: LEAVE_PAGE_MESSAGE,
@@ -78,9 +71,6 @@ export function GroupRegistrationStep({
 	};
 
 	const handlePrevClick = () => {
-		// Navigate back freely — group data stays in atoms so the user can
-		// return and continue. If they switch enrollment type on step 1,
-		// SelectionSummary will show an AlertDialog to confirm data reset.
 		onPrev();
 	};
 
